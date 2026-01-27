@@ -13,55 +13,13 @@
 #include <sstream>
 #include <iomanip>
 
+#include "poly_field.h"
 #include "rsa.h"
 #include "helper_functions.h"
+#include "tlp.h"
 
 using namespace NTL;
 using namespace CryptoPP;
-
-class TLPPuzzle {
-	private:
-		ZZ N, r, c;
-		long T;
-	public:
-		TLPPuzzle(ZZ N, ZZ r, long T, ZZ c) : N(std::move(N)), r(std::move(r)), T(std::move(T)), c(std::move(c)) {};
-		const ZZ& getR() const {return r;}
-		const long& getT() const {return T;}
-		const ZZ& getCiphertext() const {return c;}
-};
-
-TLPPuzzle generatePuzzle(
-    const RSAParams &params,
-    const std::string &message,
-    long T
-) {
-    ZZ r = RandomBnd(params.getN());
-    ZZ a = PowerMod(ZZ(2), T, params.getPhi());
-    ZZ b = PowerMod(r, a, params.getN()); // b = a^2^T 
-
-    ZZ encodedMessage = messageToZZ(message);
-    ZZ maskedMessage = encodedMessage + b % params.getN();
-    std::cout << "Masked messsage: " << maskedMessage;
-    TLPPuzzle o = TLPPuzzle(
-		    params.getN(),
-		    r,
-		    T,
-		    maskedMessage
-		    );
-    std::cout << o.getCiphertext() << std::endl;
-    return o;
-}
-
-std::string solvePuzzle(const TLPPuzzle &o, RSAParams params) {
-    ZZ b = o.getR();
-    for (long i = 0; i < o.getT(); i++) { // note to self: sequentially compute the mask of the message to reveal it
-        b = PowerMod(b, 2, params.getN());
-    }
-
-    ZZ unmaskedPuzzle = o.getCiphertext() - b;
-
-    return ZZToMessage(unmaskedPuzzle);
-}
 
 // TESTS
 
@@ -146,6 +104,17 @@ void testEndToEndPuzzle() {
     std::cout << "  OK\n";
 }
 
+void testPolynomialGeneration() {
+    ZZ testPrime = GenPrime_ZZ(512);
+    std::cout << "Field prime: " << testPrime << std::endl;
+    Poly_Field PF = Poly_Field(testPrime, 1);
+    FirstDegPolynomial P1 = FirstDegPolynomial(PF);
+    std::cout << "Polynomial Degree: " << PF.getDegree() << std::endl;
+    std::cout << "Prime Bits (m): " << PF.getBits() << std::endl;
+    // std::cout << "Base 2 T cardinality: " << PF.getLog2T() << std::endl; // Suspiciously big, check later
+    std::cout << "Generated Polynomial: " << P1.P[0] << " " << P1.P[1] << "x" << std::endl; 
+}
+
 int main() {
     std::cout << "Running TLP tests...\n\n";
 
@@ -153,6 +122,8 @@ int main() {
     testTrapdoorVsSequential();
     testSequentialTimingStatistical();
     testEndToEndPuzzle();
+
+    testPolynomialGeneration();
 
     std::cout << "\nAll tests passed.\n";
     return 0;

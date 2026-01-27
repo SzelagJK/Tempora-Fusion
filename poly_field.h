@@ -19,4 +19,12 @@ class Poly_Field {
 		const ZZ& getLog2T() const;
 };
 
+class FirstDegPolynomial {
+	public:
+		FirstDegPolynomial(Poly_Field& PF);
+		ZZ_p P[2];
+		void generateRandP(Poly_Field& PF);
+		// Potential sums
+};
+
 #endif 

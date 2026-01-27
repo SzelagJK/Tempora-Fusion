@@ -15,8 +15,12 @@ class OLE_Interface {
 		OLE_Interface(ZZ tau, ZZ log2T);
 		const ZZ& getTau() const;
 		const ZZ& getN() const;
+		ZZ_p generateR();
 };
 
+Vec<Pair<ZZ_p,ZZ_p>> generateR(Poly_Field& PF);
 
+// reconsider data type later
+long hRP(int alpha, ZZ log2T);
 
 #endif
