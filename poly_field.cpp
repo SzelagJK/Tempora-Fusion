@@ -21,7 +21,3 @@ void FirstDegPolynomial::generateRandP(Poly_Field& PF) {
 	P[0] = random_ZZ_p();
 	P[1] = random_ZZ_p();
 }
-// Sidenote: OPE paper will define T and T^n as similar but separate sets, T refers to the polynomials as a whole
-// whereas T^n refers to separate coefficients of that polynomial, so P is an element of T, and R, after expressing it 
-// as (R_1, ..., R_n) is an element of T^n. Keep in mind that n is not referring to degree of polynomials held in T.
-// Instead, it is the number of generated random polynomials for computational security. 

@@ -23,8 +23,10 @@ class OLE_Interface {
 
 // Sidenote: For code clarity, I could consider putting those functions in the OLE interface object 
 // (so that they don't need OLE interface being passed constantly)
-Vec<Vec<ZZ_p>> generateR(OLE_Interface& OLE, Poly_Field& PF, Vec<long>& alpha);
+Vec<Vec<ZZ_p>> generateR(OLE_Interface& OLE, Poly_Field& PF, Vec<long>& alpha); // Set of random polynomials
 Vec<long> generateAlpha(OLE_Interface& OLE);
 Vec<ZZ_p> hRP(OLE_Interface& OLE, FirstDegPolynomial& Poly, Vec<Vec<ZZ_p>>& R, Vec<long>& alpha);
+Vec<ZZ_p> generateVector_r(OLE_Interface& OLE);
+Vec<Vec<ZZ_p>> PreparePairs(Vec<ZZ_p> r, Vec<Vec<ZZ_p>> R);
 
 #endif

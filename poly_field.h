@@ -27,4 +27,10 @@ class FirstDegPolynomial {
 		// Potential sums
 };
 
+template<typename PolyContainer, typename Field>
+Field evaluate_deg1(const PolyContainer& P, const Field& x_) {
+	return P[0] + P[1] * x_;
+};
+
+
 #endif 

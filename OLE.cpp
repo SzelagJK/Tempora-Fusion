@@ -62,9 +62,32 @@ Vec<ZZ_p> hRP(
 			h[1] -= R[i][1];			
 		}
 	}
+	// Appending R and alpha to n+1
+	R.append(h);
+	alpha.append(1);
 	return h;
 }
 
+Vec<ZZ_p> generateVector_r(OLE_Interface& OLE) {
+	ZZ n = OLE.getN();
+	Vec<ZZ_p> r;
+	for (int i = 0; i < n + 1; i++) {
+		ZZ_p rand = random_ZZ_p();
+		r.append(rand);
+	}
+	return r;
+}
+
+Vec<Vec<ZZ_p>> PreparePairs(Vec<ZZ_p> r, Vec<Vec<ZZ_p>> R) {
+	Vec<Vec<ZZ_p>> pairs;
+	for (int i = 0; i < r.length(); i++) {
+		Vec<ZZ_p> pair;
+		pair.append(r);
+		pair.append(evaluate_deg1(R[i], r[i]) + r[i]);
+		pairs.append(pair);
+	}
+	return pairs;
+}
 
 // Tasks for next time I pick this up:
 // Protocol 2, step 1, start implementing (so far got the underlying interface for OLE, now use it for actual protocol)

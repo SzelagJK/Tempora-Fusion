@@ -115,6 +115,7 @@ void testPolynomialGeneration() {
     	std::cout << "Prime Bits (m): " << PF.getBits() << std::endl;
     	// std::cout << "Base 2 T cardinality: " << PF.getLog2T() << std::endl; // Suspiciously big, check later
 	std::cout << "Generated Polynomial: " << P1.P[0] << " " << P1.P[1] << "x" << std::endl; 
+	std::cout << "Evaluation at x*: " << evaluate_deg1(P1.P, conv<ZZ_p>(1234)) << std::endl;
 	std::cout << "	OK\n";
 }
 
@@ -139,6 +140,12 @@ void testOLEInterface() {
 	Vec<ZZ_p> h = hRP(OLE, P, R, alpha);
 
 	std::cout << "h: " << h[0] << " " << h[1] << "x" << std::endl;
+
+	Vec<ZZ_p> r = generateVector_r(OLE);
+	std::cout << "r check: " << r[1] << std::endl;
+
+	Vec<Vec<ZZ_p>> pairs = PreparePairs(r, R);
+	std::cout << "pairs check: " << pairs[1][1];
 }
 
 int main() {
