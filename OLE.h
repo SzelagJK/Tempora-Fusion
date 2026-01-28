@@ -4,7 +4,11 @@
 #include <NTL/ZZ.h>
 #include <gmp.h>
 #include <gmpxx.h>
-// include relevant gmp and cryptopp
+#include <NTL/ZZ_p.h>
+#include <NTL/vec_ZZ_p.h>
+#include <NTL/vec_long.h>
+
+#include "poly_field.h"
 
 using namespace NTL;
 
@@ -15,12 +19,12 @@ class OLE_Interface {
 		OLE_Interface(ZZ tau, ZZ log2T);
 		const ZZ& getTau() const;
 		const ZZ& getN() const;
-		ZZ_p generateR();
 };
 
-Vec<Pair<ZZ_p,ZZ_p>> generateR(Poly_Field& PF);
-
-// reconsider data type later
-long hRP(int alpha, ZZ log2T);
+// Sidenote: For code clarity, I could consider putting those functions in the OLE interface object 
+// (so that they don't need OLE interface being passed constantly)
+Vec<Vec<ZZ_p>> generateR(OLE_Interface& OLE, Poly_Field& PF, Vec<long>& alpha);
+Vec<long> generateAlpha(OLE_Interface& OLE);
+Vec<ZZ_p> hRP(OLE_Interface& OLE, FirstDegPolynomial& Poly, Vec<Vec<ZZ_p>>& R, Vec<long>& alpha);
 
 #endif
