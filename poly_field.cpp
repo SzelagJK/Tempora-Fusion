@@ -2,9 +2,8 @@
 #include <cassert>
 #include <iostream>
 
-// m bits -> ceil of log_2(p), size T -> 2^{(d+1)*m}
-// ZZ(1) << (d+1) * bits -> 1 * 2^{(d + 1) * bits} (<< NTL operator)
-Poly_Field::Poly_Field(ZZ p, int d) : p(std::move(p)), d(std::move(d)), bits(NumBits(this->p)), log2T(ZZ(1) << ((d+1)*bits)) {
+// bits -> ceil of log_2(p), cardinality of T -> 2*bits, as it is F^2 
+Poly_Field::Poly_Field(ZZ p, int d) : p(std::move(p)), d(std::move(d)), bits(NumBits(this->p)), log2T(conv<ZZ>(2*bits)) { 
 	std::cout << "prime p when initialising field: " << this->p << std::endl;
 	ZZ_p::init(this->p); // Note: initilises field on the thread
 }

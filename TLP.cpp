@@ -120,7 +120,7 @@ void testPolynomialGeneration() {
 
 void testOLEInterface() {
 	std::cout << "[TEST] OLE Interface\n";
-	ZZ testPrime = GenPrime_ZZ(128);
+	ZZ testPrime = GenPrime_ZZ(512);
 	std::cout << "Field prime (OLE Interface): " << testPrime << std::endl;
 	Poly_Field PF = Poly_Field(testPrime, 1);
 	FirstDegPolynomial P = FirstDegPolynomial(PF);
@@ -131,8 +131,11 @@ void testOLEInterface() {
 	
 	ZZ tau = conv<ZZ>(10);
 	OLE_Interface OLE = OLE_Interface(tau, log2T);
+	std::cout << "Checkpoint: Interface Created" << std::endl;
 	Vec<long> alpha = generateAlpha(OLE);
+	std::cout << "Checkpoint: Alpha generated" << std::endl;
 	Vec<Vec<ZZ_p>> R = generateR(OLE, PF, alpha);
+	std::cout << "Checkpoint: R generated" << std::endl;
 	Vec<ZZ_p> h = hRP(OLE, P, R, alpha);
 
 	std::cout << "h: " << h[0] << " " << h[1] << "x" << std::endl;
