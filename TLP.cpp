@@ -137,18 +137,18 @@ void testOLEInterface() {
 	ZZ tau = conv<ZZ>(10);
 	OLE_Interface OLE = OLE_Interface(tau, log2T);
 	std::cout << "Checkpoint: Interface Created" << std::endl;
-	Vec<long> alpha = generateAlpha(OLE);
+	Vec<long> alpha = OLE.generateAlpha();
 	std::cout << "Checkpoint: Alpha generated" << std::endl;
-	Vec<Vec<ZZ_p>> R = generateR(OLE, PF, alpha);
+	Vec<Vec<ZZ_p>> R = OLE.generateR(PF, alpha);
 	std::cout << "Checkpoint: R generated" << std::endl;
-	Vec<ZZ_p> h = hRP(OLE, P, R, alpha);
+	Vec<ZZ_p> h = OLE.hRP(P, R, alpha);
 
 	std::cout << "h: " << h[0] << " " << h[1] << "x" << std::endl;
 
-	Vec<ZZ_p> r = generateVector_r(OLE);
+	Vec<ZZ_p> r = OLE.generateVector_r();
 	std::cout << "r check: " << r[1] << std::endl;
 
-	Vec<Vec<ZZ_p>> pairs = PreparePairs(r, R, conv<ZZ_p>(13));
+	Vec<Vec<ZZ_p>> pairs = OLE.PreparePairs(r, R, conv<ZZ_p>(13));
 	std::cout << "pairs check: " << pairs[1][1] << std::endl;
 
 	ZZ_p maskedOutput = OLE.runOT_and_sum(pairs, alpha, key_bits);

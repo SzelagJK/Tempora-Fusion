@@ -10,9 +10,9 @@ OLE_Interface::OLE_Interface(ZZ tau, int log2T) : tau(std::move(tau)), n(log2T +
 const ZZ& OLE_Interface::getTau() const {return tau;}
 const ZZ& OLE_Interface::getN() const {return n;}
 
-Vec<Vec<ZZ_p>> generateR(OLE_Interface& OLE, Poly_Field& PF, Vec<long>& alpha) {
+const Vec<Vec<ZZ_p>> OLE_Interface::generateR(Poly_Field& PF, Vec<long>& alpha) const {
 	assert(!IsZero(ZZ_p::modulus()));
-	ZZ n = OLE.getN();
+	ZZ n = getN();
 	Vec<Vec<ZZ_p>> R;
 
 	for (int i = 0; i < n; i++) {
@@ -27,10 +27,10 @@ Vec<Vec<ZZ_p>> generateR(OLE_Interface& OLE, Poly_Field& PF, Vec<long>& alpha) {
 	return R;
 }
 
-Vec<long> generateAlpha(OLE_Interface& OLE) {
+const Vec<long> OLE_Interface::generateAlpha() const {
 	std::cout<< "in alpha" << std::endl;
 	// Check size n
-	ZZ n = OLE.getN();
+	ZZ n = getN();
 	if (n > NTL::to_ZZ(LONG_MAX)) Error("Failed to generate alpha: n too large for long datatype");
 	long long_n = conv<long>(n); // could be potentially optimised if n would be a long to begin with (instead of ZZ) 
 	Vec<long> alpha;
@@ -44,13 +44,12 @@ Vec<long> generateAlpha(OLE_Interface& OLE) {
 	return alpha;
 }
 
-Vec<ZZ_p> hRP(
-		OLE_Interface& OLE, 
+const Vec<ZZ_p> OLE_Interface::hRP(
 		FirstDegPolynomial& Poly, // P sampled by Alice 
 		Vec<Vec<ZZ_p>>& R, // n randomly generated polynomials
-		Vec<long>& alpha) 
+		Vec<long>& alpha) const
 {
-	ZZ n = OLE.getN();
+	ZZ n = getN();
 	long n_long = conv<long>(n);
 	Vec<ZZ_p> h; // temp 
 	h.SetLength(2);
@@ -74,8 +73,8 @@ Vec<ZZ_p> hRP(
 	return h;
 }
 
-Vec<ZZ_p> generateVector_r(OLE_Interface& OLE) {
-	ZZ n = OLE.getN();
+const Vec<ZZ_p> OLE_Interface::generateVector_r() const {
+	ZZ n = getN();
 	Vec<ZZ_p> r;
 	for (int i = 0; i < n + 1; i++) {
 		ZZ_p rand = random_ZZ_p();
@@ -84,7 +83,7 @@ Vec<ZZ_p> generateVector_r(OLE_Interface& OLE) {
 	return r;
 }
 
-Vec<Vec<ZZ_p>> PreparePairs(Vec<ZZ_p> r, Vec<Vec<ZZ_p>> R, ZZ_p x_star) {
+const Vec<Vec<ZZ_p>> OLE_Interface::PreparePairs(Vec<ZZ_p> r, Vec<Vec<ZZ_p>> R, ZZ_p x_star) const {
 	Vec<Vec<ZZ_p>> pairs;
 	for (int i = 0; i < r.length(); i++) {
 		Vec<ZZ_p> pair;
