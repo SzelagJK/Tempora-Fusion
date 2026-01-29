@@ -9,6 +9,7 @@
 #include <NTL/vec_long.h>
 
 #include "poly_field.h"
+#include "OT_1of2.h"
 
 using namespace NTL;
 
@@ -16,9 +17,10 @@ class OLE_Interface {
 	private:
 		const ZZ tau, n;
 	public:
-		OLE_Interface(ZZ tau, ZZ log2T);
+		OLE_Interface(ZZ tau, int log2T);
 		const ZZ& getTau() const;
 		const ZZ& getN() const;
+		const Vec<ZZ_p> runOT(Vec<Vec<ZZ_p>>& pairs, Vec<long>& alpha, int key_bits) const;
 };
 
 // Sidenote: For code clarity, I could consider putting those functions in the OLE interface object 

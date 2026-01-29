@@ -122,13 +122,16 @@ void testPolynomialGeneration() {
 
 void testOLEInterface() {
 	std::cout << "[TEST] OLE Interface\n";
-	ZZ testPrime = GenPrime_ZZ(512);
+	int key_bits = 512;
+	ZZ testPrime = GenPrime_ZZ(key_bits);
 	std::cout << "Field prime (OLE Interface): " << testPrime << std::endl;
 	Poly_Field PF = Poly_Field(testPrime, 1);
 	FirstDegPolynomial P = FirstDegPolynomial(PF);
 	int d = PF.getDegree();
 	long bits = PF.getBits();
-	ZZ log2T = PF.getLog2T();
+	std::cout << "BITS: " << bits << std::endl;
+	int log2T = PF.getLog2T();
+	std::cout << "LOG2T: " << log2T << std::endl;
 	// When implementing unit test, start here
 	
 	ZZ tau = conv<ZZ>(10);
@@ -146,7 +149,10 @@ void testOLEInterface() {
 	std::cout << "r check: " << r[1] << std::endl;
 
 	Vec<Vec<ZZ_p>> pairs = PreparePairs(r, R);
-	std::cout << "pairs check: " << pairs[1][1];
+	std::cout << "pairs check: " << pairs[1][1] << std::endl;
+
+	Vec<ZZ_p> maskedOutput = OLE.runOT(pairs, alpha, key_bits);
+	std::cout << "OT loop check: " << maskedOutput[0] << std::endl;
 
 	std::cout << "	OK\n";
 }
@@ -157,7 +163,7 @@ void testOT() {
 	ZZ_p rm1 = random_ZZ_p();
 	bigint result;
 	mpz_init(result);
-	bigint* result_ptr = OT_1of2(rm0, rm1, 1, 128);
+	bigint* result_ptr = OT_1of2(rm0, rm1, 1, 512);
 	mpz_set(result, *result_ptr);
 	char* s = mpz_get_str(NULL, 10, result);
 	std::cout << "OT result: " << s << std::endl;
@@ -174,8 +180,8 @@ int main() {
     testEndToEndPuzzle();
 
     testPolynomialGeneration();
-    testOLEInterface();
     testOT();
+    testOLEInterface();
 
     std::cout << "\nAll tests passed.\n";
     return 0;

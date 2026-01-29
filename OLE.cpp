@@ -1,9 +1,12 @@
 #include "OLE.h"
+#include <iostream>
 #include <cassert>
 
 using namespace NTL;
 
-OLE_Interface::OLE_Interface(ZZ tau, ZZ log2T) : tau(std::move(tau)), n(log2T + 2 * tau) {}
+OLE_Interface::OLE_Interface(ZZ tau, int log2T) : tau(std::move(tau)), n(log2T + 2 * tau) {
+	std::cout << "INTERFEACE PARAMS, TAU: " << this->tau << " LOG2T: " << log2T << std::endl;
+}
 const ZZ& OLE_Interface::getTau() const {return tau;}
 const ZZ& OLE_Interface::getN() const {return n;}
 
@@ -25,15 +28,18 @@ Vec<Vec<ZZ_p>> generateR(OLE_Interface& OLE, Poly_Field& PF, Vec<long>& alpha) {
 }
 
 Vec<long> generateAlpha(OLE_Interface& OLE) {
+	std::cout<< "in alpha" << std::endl;
 	// Check size n
 	ZZ n = OLE.getN();
 	if (n > NTL::to_ZZ(LONG_MAX)) Error("Failed to generate alpha: n too large for long datatype");
 	long long_n = conv<long>(n); // could be potentially optimised if n would be a long to begin with (instead of ZZ) 
 	Vec<long> alpha;
+	std::cout << long_n << std::endl;
 	alpha.SetLength(long_n);
 
-	for (int i = 0; i < n; i++) {
+	for (long i = 0; i < n; i++) {
 		alpha[i] = RandomBnd(2);
+		//alpha.append(RandomBnd(2));
 	}
 	return alpha;
 }
@@ -87,6 +93,19 @@ Vec<Vec<ZZ_p>> PreparePairs(Vec<ZZ_p> r, Vec<Vec<ZZ_p>> R) {
 		pairs.append(pair);
 	}
 	return pairs;
+}
+
+const Vec<ZZ_p> OLE_Interface::runOT(Vec<Vec<ZZ_p>>& pairs, Vec<long>& alpha, int key_bits) const {
+	Vec<ZZ_p> maskedOutput;
+	for (int i = 0; i < pairs.length(); i++) {
+		bigint* result_ptr = OT_1of2(pairs[i][0], pairs[i][1], alpha[i], key_bits);
+		char* s = mpz_get_str(NULL, 10, *result_ptr);
+		ZZ z = conv<ZZ>(s);
+		ZZ_p OT_choice = conv<ZZ_p>(z);
+		maskedOutput.append(OT_choice);
+		free(s);
+	}
+	return maskedOutput;
 }
 
 // Tasks for next time I pick this up:
