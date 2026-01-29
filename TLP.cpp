@@ -1,5 +1,4 @@
 #include <NTL/ZZ.h>
-//#include <gmpxx.h> // gmpxx not found, fix at a later point  (NTL works)
 #include <cryptopp/aes.h>
 #include <cryptopp/modes.h>
 #include <cryptopp/osrng.h>
@@ -14,8 +13,9 @@
 #include <iomanip>
 
 #include "poly_field.h"
-#include "OLE.h"
 #include "OT_1of2.h"
+#include "ope_interface.h"
+#include "ole.h"
 #include "rsa.h"
 #include "helper_functions.h"
 #include "tlp.h"
@@ -120,44 +120,43 @@ void testPolynomialGeneration() {
 	std::cout << "	OK\n";
 }
 
-void testOLEInterface() {
-	std::cout << "[TEST] OLE Interface\n";
+void testOPEInterface() {
+	std::cout << "[TEST] OPE Interface\n";
 	int key_bits = 512;
 	ZZ testPrime = GenPrime_ZZ(key_bits);
-	std::cout << "Field prime (OLE Interface): " << testPrime << std::endl;
+	std::cout << "Field prime (OPE Interface): " << testPrime << std::endl;
 	Poly_Field PF = Poly_Field(testPrime, 1);
 	FirstDegPolynomial P = FirstDegPolynomial(PF);
 	int d = PF.getDegree();
 	long bits = PF.getBits();
-	std::cout << "BITS: " << bits << std::endl;
 	int log2T = PF.getLog2T();
-	std::cout << "LOG2T: " << log2T << std::endl;
+
 	// When implementing unit test, start here
 	
 	ZZ tau = conv<ZZ>(10);
-	OLE_Interface OLE = OLE_Interface(tau, log2T);
+	OPE_Interface OPE = OPE_Interface(tau, log2T);
 	std::cout << "Checkpoint: Interface Created" << std::endl;
-	Vec<long> alpha = OLE.generateAlpha();
+	Vec<long> alpha = OPE.generateAlpha();
 	std::cout << "Checkpoint: Alpha generated" << std::endl;
-	Vec<Vec<ZZ_p>> R = OLE.generateR(PF, alpha);
+	Vec<Vec<ZZ_p>> R = OPE.generateR(PF, alpha);
 	std::cout << "Checkpoint: R generated" << std::endl;
-	Vec<ZZ_p> h = OLE.hRP(P, R, alpha);
+	Vec<ZZ_p> h = OPE.hRP(P, R, alpha);
 
 	std::cout << "h: " << h[0] << " " << h[1] << "x" << std::endl;
 
-	Vec<ZZ_p> r = OLE.generateVector_r();
+	Vec<ZZ_p> r = OPE.generateVector_r();
 	std::cout << "r check: " << r[1] << std::endl;
 
-	Vec<Vec<ZZ_p>> pairs = OLE.PreparePairs(r, R, conv<ZZ_p>(13));
+	Vec<Vec<ZZ_p>> pairs = OPE.PreparePairs(r, R, conv<ZZ_p>(13));
 	std::cout << "pairs check: " << pairs[1][1] << std::endl;
 
-	ZZ_p maskedOutput = OLE.runOT_and_sum(pairs, alpha, key_bits);
+	ZZ_p maskedOutput = OPE.runOT_and_sum(pairs, alpha, key_bits);
 	std::cout << "OT loop check: " << maskedOutput << std::endl;
 
-	ZZ_p result = OLE.extract_eval(maskedOutput, r);
-	std::cout << "Final OLE result evaluation: " << result << std::endl;
+	ZZ_p result = OPE.extract_eval(maskedOutput, r);
+	std::cout << "Final OPE result evaluation: " << result << std::endl;
 
-	std::cout << "	OK\n";
+	std::cout << "	OK\n\n\n";
 }
 
 void testOT() {
@@ -174,6 +173,18 @@ void testOT() {
 	std::cout << "	OK\n";
 }
 
+void testOLE() {
+	std::cout << "\n\n\n [TEST] OLE main test\n" << std::endl;
+	ZZ test_prime = GenPrime_ZZ(512);
+	OLE OLE_p = OLE(test_prime);
+	ZZ testInput = conv<ZZ>(1000);
+	std::cout << "Testing OLE on input: " << testInput << std::endl;
+	ZZ_p result = OLE_p.runOLE(testInput);
+	std::cout << "Computed evaluation: " << result << std::endl;
+
+	std::cout << "	OK\n";
+}
+
 int main() {
     std::cout << "Running TLP tests...\n\n";
 
@@ -182,14 +193,18 @@ int main() {
     testSequentialTimingStatistical();
     testEndToEndPuzzle();
 
-    testPolynomialGeneration();
-    testOT();
-    testOLEInterface();
+    // Auxillery tests
+    //testPolynomialGeneration();
+    //testOT();
+    //testOPEInterface();
+
+    // Main test for OLE
+    testOLE();
 
     std::cout << "\nAll tests passed.\n";
     return 0;
 }
 
 // NOTES for next time I'll pick this up: separate functions into C headers to use them across different files (RSA key generation, Puzzle generation, TLP functions, helper functions)
-// Start putting everything together with respect to the paper, look over OLE and PRF implementations to see if they are correct and can be used.
+// Start putting everything together with respect to the paper, look over OPE and PRF implementations to see if they are correct and can be used.
 // Keep in mind that the plaintext message will be first encoded as a polynomial, so we can keep the Message to ZZ and its inverse- but we need to add additional functions that encode ZZ into a polynomial (plus interpolation)

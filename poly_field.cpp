@@ -4,11 +4,11 @@
 
 // bits -> ceil of log_2(p), cardinality of T -> 2*bits, as it is F^2 
 Poly_Field::Poly_Field(ZZ p, int d) : p(std::move(p)), d(std::move(d)), bits(NumBits(this->p)), log2T((2 * bits)) { 
-	std::cout << "BITS CHECK: " << bits << std::endl;
+	std::cout << "[Poly_Field] Prime p when initialising field: " << this->p << std::endl;
+	std::cout << "[Poly_Field] Bits check: " << bits << std::endl;
 	int CORRECT = 2 * bits;
-	std::cout << "SHOULD BE: " << CORRECT << std::endl;
-	std::cout << "LOG2T check: " << log2T << std::endl;
-	std::cout << "prime p when initialising field: " << this->p << std::endl;
+	std::cout << "[Poly_Field] Log2T True Value: " << CORRECT << std::endl;
+	std::cout << "[Poly_Field] Log2T Initialised: " << log2T << std::endl;
 	ZZ_p::init(this->p); // Note: initilises field on the thread
 }
 const ZZ& Poly_Field::getPrime() const {return p;} 
