@@ -152,7 +152,18 @@ void testOLEInterface() {
 }
 
 void testOT() {
-	std::cout << "[TEST] Oblivious Transfer (1-out-of-2)\n"
+	std::cout << "[TEST] Oblivious Transfer (1-out-of-2)\n";
+	ZZ_p rm0 = random_ZZ_p();
+	ZZ_p rm1 = random_ZZ_p();
+	bigint result;
+	mpz_init(result);
+	bigint* result_ptr = OT_1of2(rm0, rm1, 1, 128);
+	mpz_set(result, *result_ptr);
+	char* s = mpz_get_str(NULL, 10, result);
+	std::cout << "OT result: " << s << std::endl;
+
+	std::cout << "	OK\n";
+}
 
 int main() {
     std::cout << "Running TLP tests...\n\n";
@@ -164,6 +175,7 @@ int main() {
 
     testPolynomialGeneration();
     testOLEInterface();
+    testOT();
 
     std::cout << "\nAll tests passed.\n";
     return 0;

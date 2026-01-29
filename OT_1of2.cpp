@@ -1,9 +1,20 @@
 #include "OT_1of2.h"
 
-void ZZ_to_mpz(mpz_t type_mpz, const NTL::ZZ_p& type_ZZp) {
-	ZZ lift = rep(type_ZZp);
-	std::string s conv<std::string>(lift);
-	mpz_set_str(type_mpz, s.c_str(), 10);
+bigint one, zero;
+
+void ZZp_to_mpz(mpz_t type_mpz, const ZZ_p& type_ZZp) {
+    	ZZ lift = rep(type_ZZp);
+    	std::stringstream ss;
+    	ss << lift;
+    	std::string s = ss.str();
+    	mpz_set_str(type_mpz, s.c_str(), 10);
+}
+
+mpz_t* alloc_mpz_array(int n) {
+    	mpz_t* arr = (mpz_t*)malloc(n * sizeof(mpz_t));
+    	for (int i = 0; i < n; i++)
+        	mpz_init(arr[i]);
+    	return arr;
 }
 
 mpz_t** alloc_mpz_matrix(int rows, int cols) {
@@ -36,7 +47,7 @@ bigint** GenKeys(int number, bigint* &random_val_, int bit_size, int bit_size_) 
 
 bigint* SS_v2(int size, bigint secret, bigint* random_val, bigint* &p_shares){
     	bigint *s_shares = alloc_mpz_array(size);
-    	p_shares         = alloc_mpz_array(size);
+    	p_shares = alloc_mpz_array(size);
     	for (int i = 0; i < size ; i++){
         	mpz_xor(s_shares[i], random_val[i], secret);
         	mpz_set(p_shares[i], random_val[i]);
@@ -83,8 +94,13 @@ bigint* extract_result(int size, bigint* p_response, int* secret_indices, bigint
 
 
 // Taken directly from previous implementation
-bigint OT_1of2(const ZZ_p m0, const ZZ_p m1, int choice, int bits) {
+bigint* OT_1of2(const ZZ_p m0_, const ZZ_p m1_, int choice, int key_bits) {
 	// Convert to mpz datatype first, since this implementation uses mainly ZZ_p
+	bigint m0, m1;
+	mpz_init(m0);
+	mpz_init(m1);
+	ZZp_to_mpz(m0, m0_);
+        ZZp_to_mpz(m1, m1_);	
 
 	int count = 1;
 	int secret_bit_size = 1;
@@ -119,5 +135,5 @@ bigint OT_1of2(const ZZ_p m0, const ZZ_p m1, int choice, int bits) {
 	bigint* final_result = extract_result(count, p_perm, secret_indices, random_keys_);
 	mpz_clear(s);
 	
-	return final_result[0]
+	return &final_result[0];
 }
