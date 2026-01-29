@@ -148,11 +148,14 @@ void testOLEInterface() {
 	Vec<ZZ_p> r = generateVector_r(OLE);
 	std::cout << "r check: " << r[1] << std::endl;
 
-	Vec<Vec<ZZ_p>> pairs = PreparePairs(r, R);
+	Vec<Vec<ZZ_p>> pairs = PreparePairs(r, R, conv<ZZ_p>(13));
 	std::cout << "pairs check: " << pairs[1][1] << std::endl;
 
-	Vec<ZZ_p> maskedOutput = OLE.runOT(pairs, alpha, key_bits);
-	std::cout << "OT loop check: " << maskedOutput[0] << std::endl;
+	ZZ_p maskedOutput = OLE.runOT_and_sum(pairs, alpha, key_bits);
+	std::cout << "OT loop check: " << maskedOutput << std::endl;
+
+	ZZ_p result = OLE.extract_eval(maskedOutput, r);
+	std::cout << "Final OLE result evaluation: " << result << std::endl;
 
 	std::cout << "	OK\n";
 }

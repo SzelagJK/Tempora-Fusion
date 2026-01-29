@@ -84,26 +84,33 @@ Vec<ZZ_p> generateVector_r(OLE_Interface& OLE) {
 	return r;
 }
 
-Vec<Vec<ZZ_p>> PreparePairs(Vec<ZZ_p> r, Vec<Vec<ZZ_p>> R) {
+Vec<Vec<ZZ_p>> PreparePairs(Vec<ZZ_p> r, Vec<Vec<ZZ_p>> R, ZZ_p x_star) {
 	Vec<Vec<ZZ_p>> pairs;
 	for (int i = 0; i < r.length(); i++) {
 		Vec<ZZ_p> pair;
 		pair.append(r);
-		pair.append(evaluate_deg1(R[i], r[i]) + r[i]);
+		pair.append(evaluate_deg1(R[i], x_star) + r[i]);
 		pairs.append(pair);
 	}
 	return pairs;
 }
 
-const Vec<ZZ_p> OLE_Interface::runOT(Vec<Vec<ZZ_p>>& pairs, Vec<long>& alpha, int key_bits) const {
-	Vec<ZZ_p> maskedOutput;
+const ZZ_p OLE_Interface::runOT_and_sum(Vec<Vec<ZZ_p>>& pairs, Vec<long>& alpha, int key_bits) const {
+	ZZ_p maskedOutput = conv<ZZ_p>(0);
 	for (int i = 0; i < pairs.length(); i++) {
-		bigint* result_ptr = OT_1of2(pairs[i][0], pairs[i][1], alpha[i], key_bits);
+		bigint* result_ptr = OT_1of2(pairs[i][0], pairs[i][1], alpha[i], key_bits); // step 3
 		char* s = mpz_get_str(NULL, 10, *result_ptr);
 		ZZ z = conv<ZZ>(s);
 		ZZ_p OT_choice = conv<ZZ_p>(z);
-		maskedOutput.append(OT_choice);
+		maskedOutput += OT_choice; // step 4
 		free(s);
+	}
+	return maskedOutput;
+}
+
+const ZZ_p OLE_Interface::extract_eval(ZZ_p& maskedOutput, Vec<ZZ_p>& r) const {
+	for (int i = 0; i < r.length(); i++) {
+		maskedOutput -= r[i];
 	}
 	return maskedOutput;
 }
