@@ -15,6 +15,7 @@
 
 #include "poly_field.h"
 #include "OLE.h"
+#include "OT_1of2.h"
 #include "rsa.h"
 #include "helper_functions.h"
 #include "tlp.h"
@@ -146,7 +147,12 @@ void testOLEInterface() {
 
 	Vec<Vec<ZZ_p>> pairs = PreparePairs(r, R);
 	std::cout << "pairs check: " << pairs[1][1];
+
+	std::cout << "	OK\n";
 }
+
+void testOT() {
+	std::cout << "[TEST] Oblivious Transfer (1-out-of-2)\n"
 
 int main() {
     std::cout << "Running TLP tests...\n\n";
