@@ -1,4 +1,5 @@
 #include "ole.h"
+#include <iostream>
 
 OLE::OLE(ZZ p) : p(std::move(p)) {};
 
@@ -25,6 +26,8 @@ const ZZ_p OLE::runOLE(ZZ x_star) const {
 	// Step 3
 	ZZ_p obliviousResult = OPE.runOT_and_sum(pairs, alpha, key_bits);
 
+	// Test
+	std::cout << "Correct evaluation: " << evaluate_deg1(P.P, input) << std::endl;
 	// Step 4
 	return OPE.extract_eval(obliviousResult, r);
 }
