@@ -190,7 +190,7 @@ void testOLE() {
 
 void testOLE_enhanced() {
 	std::cout << "\n\n\n [TEST] OLE+ main test\n" << std::endl;
-	int key_bits = 512;
+	int key_bits = 128;
 	ZZ test_prime = GenPrime_ZZ(key_bits);
 	OLE_enhanced OLE_p(test_prime);
 	ZZ testInput = conv<ZZ>(1000);
@@ -206,12 +206,12 @@ void testOLE_enhanced() {
 }
 
 int main() {
-    	std::cout << "Running TLP tests...\n\n";
+    	//std::cout << "Running TLP tests...\n\n";
 
-    	testRSASetup();
-    	testTrapdoorVsSequential();
-   	testSequentialTimingStatistical();
-    	testEndToEndPuzzle();
+    	//testRSASetup();
+    	//testTrapdoorVsSequential();
+   	//testSequentialTimingStatistical();
+    	//testEndToEndPuzzle();
 
     	// Auxillery tests
     	//testPolynomialGeneration();
@@ -219,13 +219,18 @@ int main() {
     	//testOPEInterface();
 
     	// Main test for OLE
-	testOLE();
+	// testOLE();
 
 	// Main test for OLE+
 	auto start = std::chrono::high_resolution_clock::now();
-	testOLE_enhanced();
+	int iterations = 100;
+	for (int i = 0; i < iterations; i++)
+		testOLE_enhanced();
 	auto end = std::chrono::high_resolution_clock::now();	
+
 	std::chrono::duration<double, std::micro> test_time = end - start;
+	double average_time = test_time.count()/iterations;
+	std::cout << "OLE+ average execution time: " << average_time/1000 << "ms" << std::endl;
 	std::cout << "OLE+ total execution time: " << test_time.count()/1000 << "ms" << std::endl;
 
     	std::cout << "\nAll tests passed.\n";
