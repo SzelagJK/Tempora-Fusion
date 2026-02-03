@@ -1,4 +1,3 @@
-#include <NTL/ZZ.h>
 #include <cryptopp/aes.h>
 #include <cryptopp/modes.h>
 #include <cryptopp/osrng.h>
@@ -16,6 +15,7 @@
 #include "OT_1of2.h"
 #include "ope_interface.h"
 #include "ole.h"
+#include "ole_enhanced.h"
 #include "rsa.h"
 #include "helper_functions.h"
 #include "tlp.h"
@@ -175,34 +175,61 @@ void testOT() {
 
 void testOLE() {
 	std::cout << "\n\n\n [TEST] OLE main test\n" << std::endl;
-	ZZ test_prime = GenPrime_ZZ(512);
-	OLE OLE_p = OLE(test_prime);
+	int key_bits = 512;
+	ZZ test_prime = GenPrime_ZZ(key_bits);
+	Poly_Field PF = Poly_Field(test_prime, 1);
+	OLE OLE_p = OLE(test_prime, key_bits, PF);
 	ZZ testInput = conv<ZZ>(1000);
+	Vec<ZZ> coeffs_ab = init_coeff_vector(3,5);
 	std::cout << "Testing OLE on input: " << testInput << std::endl;
-	ZZ_p result = OLE_p.runOLE(testInput);
+	ZZ_p result = OLE_p.runOLE(testInput, coeffs_ab);
 	std::cout << "Computed evaluation: " << result << std::endl;
 
 	std::cout << "	OK\n";
 }
 
+void testOLE_enhanced() {
+	std::cout << "\n\n\n [TEST] OLE+ main test\n" << std::endl;
+	int key_bits = 512;
+	ZZ test_prime = GenPrime_ZZ(key_bits);
+	OLE_enhanced OLE_p(test_prime);
+	ZZ testInput = conv<ZZ>(1000);
+	Vec<ZZ> coeffs_ab = init_coeff_vector(3,5);
+	// Randomise Secrets
+	ZZ s = RandomLen_ZZ(key_bits);
+	ZZ u = RandomLen_ZZ(key_bits);
+	Vec<ZZ> secrets = init_secrets_vector(s, u);
+	std::cout << "Testing OLE+ on input: " << testInput << std::endl;
+	ZZ_p result = OLE_p.runOLE_plus(testInput, coeffs_ab, secrets);
+	std::cout << "Correct evaluation: " << (coeffs_ab[0] + coeffs_ab[1]*testInput) << std::endl;
+	std::cout << "Computed evaluation: " << result << std::endl;
+}
+
 int main() {
-    std::cout << "Running TLP tests...\n\n";
+    	std::cout << "Running TLP tests...\n\n";
 
-    testRSASetup();
-    testTrapdoorVsSequential();
-    testSequentialTimingStatistical();
-    testEndToEndPuzzle();
+    	testRSASetup();
+    	testTrapdoorVsSequential();
+   	testSequentialTimingStatistical();
+    	testEndToEndPuzzle();
 
-    // Auxillery tests
-    //testPolynomialGeneration();
-    //testOT();
-    //testOPEInterface();
+    	// Auxillery tests
+    	//testPolynomialGeneration();
+    	//testOT();
+    	//testOPEInterface();
 
-    // Main test for OLE
-    testOLE();
+    	// Main test for OLE
+	testOLE();
 
-    std::cout << "\nAll tests passed.\n";
-    return 0;
+	// Main test for OLE+
+	auto start = std::chrono::high_resolution_clock::now();
+	testOLE_enhanced();
+	auto end = std::chrono::high_resolution_clock::now();	
+	std::chrono::duration<double, std::micro> test_time = end - start;
+	std::cout << "OLE+ total execution time: " << test_time.count()/1000 << "ms" << std::endl;
+
+    	std::cout << "\nAll tests passed.\n";
+    	return 0;
 }
 
 // NOTES for next time I'll pick this up: separate functions into C headers to use them across different files (RSA key generation, Puzzle generation, TLP functions, helper functions)

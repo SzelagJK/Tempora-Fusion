@@ -31,7 +31,6 @@ const Vec<long> OPE_Interface::generateAlpha() const {
 	if (n > NTL::to_ZZ(LONG_MAX)) Error("Failed to generate alpha: n too large for long datatype");
 	long long_n = conv<long>(n); // could be potentially optimised if n would be a long to begin with (instead of ZZ) 
 	Vec<long> alpha;
-	std::cout << long_n << std::endl;
 	alpha.SetLength(long_n);
 
 	for (long i = 0; i < n; i++) {

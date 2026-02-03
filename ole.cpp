@@ -1,16 +1,21 @@
 #include "ole.h"
 #include <iostream>
+#include <cassert>
 
-OLE::OLE(ZZ p) : p(std::move(p)) {};
+OLE::OLE(ZZ p, int key_bits, Poly_Field PF) : p(std::move(p)), key_bits(std::move(key_bits)), PF(std::move(PF)) {};
 
-const ZZ_p OLE::runOLE(ZZ x_star) const {
-	// Field and Polynomial Setup
-	int key_bits = NumBits(this->p);
-	Poly_Field PF = Poly_Field(this->p, 1);
+const ZZ_p OLE::runOLE(ZZ x_star, const Vec<ZZ>& coeff_ab) {
+	// Verify if coefficients a and b have been specified, if not- continue with a random polynomial P
 	FirstDegPolynomial P = FirstDegPolynomial(PF);
+	if (coeff_ab.length() > 0) {
+		assert(coeff_ab.length() == 2); // Ensure first degree
+		std::cout << "P coefficients specified - a: " << coeff_ab[0] << ", b: " << coeff_ab[1] << std::endl;
+		P.P[0] = to_ZZ_p(coeff_ab[0]);
+		P.P[1] = to_ZZ_p(coeff_ab[1]);	
+	}
 	int log2T = PF.getLog2T();
 
-	ZZ tau = conv<ZZ>(123); // Check how to calculate
+	ZZ tau = conv<ZZ>(key_bits); // Check how to calculate
 	OPE_Interface OPE = OPE_Interface(tau, log2T); // OPE Protocol 2
 
 	// Step 1 
@@ -32,4 +37,56 @@ const ZZ_p OLE::runOLE(ZZ x_star) const {
 	return OPE.extract_eval(obliviousResult, r);
 }
 
+// Overloaded to accept x_star as ZZ_p 
+const ZZ_p OLE::runOLE(ZZ_p x_star, const Vec<ZZ>& coeff_ab) {
+	FirstDegPolynomial P = FirstDegPolynomial(PF);
+	if (coeff_ab.length() > 0) {
+		assert(coeff_ab.length() == 2); // Ensure first degree
+		std::cout << "P coefficients specified - a: " << coeff_ab[0] << ", b: " << coeff_ab[1] << std::endl;
+		P.P[0] = to_ZZ_p(coeff_ab[0]);
+		P.P[1] = to_ZZ_p(coeff_ab[1]);	
+	}
+	int log2T = PF.getLog2T();
 
+	ZZ tau = conv<ZZ>(key_bits); // Check how to calculate
+	OPE_Interface OPE = OPE_Interface(tau, log2T); // OPE Protocol 2
+
+	Vec<long> alpha = OPE.generateAlpha();
+	Vec<Vec<ZZ_p>> R = OPE.generateR(PF, alpha);
+	Vec<ZZ_p> h = OPE.hRP(P, R, alpha); // Modifies R and Alpha to n+1
+	
+	Vec<ZZ_p> r = OPE.generateVector_r();
+	Vec<Vec<ZZ_p>> pairs = OPE.PreparePairs(r, R, x_star);
+
+	ZZ_p obliviousResult = OPE.runOT_and_sum(pairs, alpha, key_bits);
+
+	std::cout << "Correct evaluation: " << evaluate_deg1(P.P, x_star) << std::endl;
+	return OPE.extract_eval(obliviousResult, r);
+}
+
+// Overloaded to accept x_star and coeff_ab as ZZ_p
+const ZZ_p OLE::runOLE(ZZ_p x_star, const Vec<ZZ_p>& coeff_ab) {
+	FirstDegPolynomial P = FirstDegPolynomial(PF);
+	if (coeff_ab.length() > 0) {
+		assert(coeff_ab.length() == 2); // Ensure first degree
+		std::cout << "P coefficients specified - a: " << coeff_ab[0] << ", b: " << coeff_ab[1] << std::endl;
+		P.P[0] = coeff_ab[0];
+		P.P[1] = coeff_ab[1];	
+	}
+	int log2T = PF.getLog2T();
+
+	ZZ tau = conv<ZZ>(key_bits); // Check how to calculate
+	OPE_Interface OPE = OPE_Interface(tau, log2T); // OPE Protocol 2
+
+	Vec<long> alpha = OPE.generateAlpha();
+	Vec<Vec<ZZ_p>> R = OPE.generateR(PF, alpha);
+	Vec<ZZ_p> h = OPE.hRP(P, R, alpha); // Modifies R and Alpha to n+1
+	
+	Vec<ZZ_p> r = OPE.generateVector_r();
+	Vec<Vec<ZZ_p>> pairs = OPE.PreparePairs(r, R, x_star);
+
+	ZZ_p obliviousResult = OPE.runOT_and_sum(pairs, alpha, key_bits);
+
+	std::cout << "Correct evaluation: " << evaluate_deg1(P.P, x_star) << std::endl;
+	return OPE.extract_eval(obliviousResult, r);
+}
