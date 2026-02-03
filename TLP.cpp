@@ -223,7 +223,7 @@ int main() {
 
 	// Main test for OLE+
 	auto start = std::chrono::high_resolution_clock::now();
-	int iterations = 100;
+	int iterations = 1000;
 	for (int i = 0; i < iterations; i++)
 		testOLE_enhanced();
 	auto end = std::chrono::high_resolution_clock::now();	

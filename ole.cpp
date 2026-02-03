@@ -9,7 +9,7 @@ const ZZ_p OLE::runOLE(ZZ x_star, const Vec<ZZ>& coeff_ab) {
 	FirstDegPolynomial P = FirstDegPolynomial(PF);
 	if (coeff_ab.length() > 0) {
 		assert(coeff_ab.length() == 2); // Ensure first degree
-		std::cout << "P coefficients specified - a: " << coeff_ab[0] << ", b: " << coeff_ab[1] << std::endl;
+		std::cout << "[OLE] P coefficients specified - a: " << coeff_ab[0] << ", b: " << coeff_ab[1] << std::endl;
 		P.P[0] = to_ZZ_p(coeff_ab[0]);
 		P.P[1] = to_ZZ_p(coeff_ab[1]);	
 	}
@@ -32,7 +32,7 @@ const ZZ_p OLE::runOLE(ZZ x_star, const Vec<ZZ>& coeff_ab) {
 	ZZ_p obliviousResult = OPE.runOT_and_sum(pairs, alpha, key_bits);
 
 	// Test
-	std::cout << "Correct evaluation: " << evaluate_deg1(P.P, input) << std::endl;
+	std::cout << "[OLE] Correct evaluation: " << evaluate_deg1(P.P, input) << std::endl;
 	// Step 4
 	return OPE.extract_eval(obliviousResult, r);
 }
@@ -42,7 +42,7 @@ const ZZ_p OLE::runOLE(ZZ_p x_star, const Vec<ZZ>& coeff_ab) {
 	FirstDegPolynomial P = FirstDegPolynomial(PF);
 	if (coeff_ab.length() > 0) {
 		assert(coeff_ab.length() == 2); // Ensure first degree
-		std::cout << "P coefficients specified - a: " << coeff_ab[0] << ", b: " << coeff_ab[1] << std::endl;
+		std::cout << "[OLE] P coefficients specified - a: " << coeff_ab[0] << ", b: " << coeff_ab[1] << std::endl;
 		P.P[0] = to_ZZ_p(coeff_ab[0]);
 		P.P[1] = to_ZZ_p(coeff_ab[1]);	
 	}
@@ -60,7 +60,7 @@ const ZZ_p OLE::runOLE(ZZ_p x_star, const Vec<ZZ>& coeff_ab) {
 
 	ZZ_p obliviousResult = OPE.runOT_and_sum(pairs, alpha, key_bits);
 
-	std::cout << "Correct evaluation: " << evaluate_deg1(P.P, x_star) << std::endl;
+	std::cout << "[OLE] Correct evaluation: " << evaluate_deg1(P.P, x_star) << std::endl;
 	return OPE.extract_eval(obliviousResult, r);
 }
 
@@ -69,7 +69,7 @@ const ZZ_p OLE::runOLE(ZZ_p x_star, const Vec<ZZ_p>& coeff_ab) {
 	FirstDegPolynomial P = FirstDegPolynomial(PF);
 	if (coeff_ab.length() > 0) {
 		assert(coeff_ab.length() == 2); // Ensure first degree
-		std::cout << "P coefficients specified - a: " << coeff_ab[0] << ", b: " << coeff_ab[1] << std::endl;
+		std::cout << "[OLE] P coefficients specified - a: " << coeff_ab[0] << ", b: " << coeff_ab[1] << std::endl;
 		P.P[0] = coeff_ab[0];
 		P.P[1] = coeff_ab[1];	
 	}
@@ -87,6 +87,6 @@ const ZZ_p OLE::runOLE(ZZ_p x_star, const Vec<ZZ_p>& coeff_ab) {
 
 	ZZ_p obliviousResult = OPE.runOT_and_sum(pairs, alpha, key_bits);
 
-	std::cout << "Correct evaluation: " << evaluate_deg1(P.P, x_star) << std::endl;
+	std::cout << "[OLE] Correct evaluation: " << evaluate_deg1(P.P, x_star) << std::endl;
 	return OPE.extract_eval(obliviousResult, r);
 }
