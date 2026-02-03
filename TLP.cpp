@@ -193,8 +193,8 @@ void testOLE_enhanced() {
 	int key_bits = 128;
 	ZZ test_prime = GenPrime_ZZ(key_bits);
 	OLE_enhanced OLE_p(test_prime);
-	ZZ testInput = conv<ZZ>(1000);
-	Vec<ZZ> coeffs_ab = init_coeff_vector(3,5);
+	ZZ testInput = conv<ZZ>(10);
+	Vec<ZZ> coeffs_ab = init_coeff_vector(11,5);
 	// Randomise Secrets
 	ZZ s = RandomLen_ZZ(key_bits);
 	ZZ u = RandomLen_ZZ(key_bits);
@@ -223,7 +223,7 @@ int main() {
 
 	// Main test for OLE+
 	auto start = std::chrono::high_resolution_clock::now();
-	int iterations = 1000;
+	int iterations = 1;
 	for (int i = 0; i < iterations; i++)
 		testOLE_enhanced();
 	auto end = std::chrono::high_resolution_clock::now();	
@@ -236,7 +236,6 @@ int main() {
     	std::cout << "\nAll tests passed.\n";
     	return 0;
 }
-
-// NOTES for next time I'll pick this up: separate functions into C headers to use them across different files (RSA key generation, Puzzle generation, TLP functions, helper functions)
-// Start putting everything together with respect to the paper, look over OPE and PRF implementations to see if they are correct and can be used.
-// Keep in mind that the plaintext message will be first encoded as a polynomial, so we can keep the Message to ZZ and its inverse- but we need to add additional functions that encode ZZ into a polynomial (plus interpolation)
+// Notes for the next time: 
+// Move onto the paper and proceed with linear combinations + interactions (see what fits best at this point in the implementation)
+// This will become a library remember to generalise interfaces to any degree polynomial, and add some more overloading

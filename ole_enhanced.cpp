@@ -14,8 +14,8 @@ const ZZ_p OLE_enhanced::runOLE_plus(ZZ x_star, const Vec<ZZ>& coeff_ab, const V
 	ZZ_p x_star_ZZ_p = to_ZZ_p(x_star);
 	ZZ_p x_inverse = inv(x_star_ZZ_p);
 	ZZ_p t = OLE_p.runOLE(x_inverse, secrets_su); // Runs through a polynomial, instead, run it through ux^-1 + s
-	std::cout << "[OLE_Enhanced] Correct t: " << (to_ZZ_p(secrets_su[1])*x_inverse + to_ZZ_p(secrets_su[0])) << std::endl;
-	std::cout << "[OLE_Enhanced] Computed t: " << t << std::endl;
+	//std::cout << "[OLE_Enhanced] Correct t: " << (to_ZZ_p(secrets_su[1])*x_inverse+to_ZZ_p(secrets_su[0])) << std::endl;
+	//std::cout << "[OLE_Enhanced] Computed t: " << t << std::endl;
 
 	// Second round OLE
 	Vec<ZZ_p> masked_coeff;
@@ -27,8 +27,8 @@ const ZZ_p OLE_enhanced::runOLE_plus(ZZ x_star, const Vec<ZZ>& coeff_ab, const V
 	masked_coeff[1] = to_ZZ_p(coeff_ab[1]) + t; // t + a
 	masked_coeff[0] = to_ZZ_p(coeff_ab[0]) - to_ZZ_p(secrets_su[1]); // b - u
 	ZZ_p c = OLE_p.runOLE(x_star_ZZ_p, masked_coeff);
-	std::cout << "[OLE_Enhanced] Correct c: " << (masked_coeff[0] + masked_coeff[1] * x_star_ZZ_p) << std::endl;
-	std::cout << "[OLE_Enhanced] Computed c: " << c << std::endl;
+	//std::cout << "[OLE_Enhanced] Correct c: " << (masked_coeff[0] + masked_coeff[1] * x_star_ZZ_p) << std::endl;
+	//std::cout << "[OLE_Enhanced] Computed c: " << c << std::endl;
 
 	// outputs correction: c = ax + b + sx -> ax + b = c - sx
 	return c - (to_ZZ_p(secrets_su[0])*to_ZZ_p(x_star));
