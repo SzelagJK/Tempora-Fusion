@@ -41,4 +41,6 @@ class Setup_C {
 		const ZZ_p& getPublicKey() const;
 };
 
+std::vector<Setup_C> setupMultipleClients(long lambda, int n);
+
 #endif

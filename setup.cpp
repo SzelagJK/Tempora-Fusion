@@ -41,6 +41,15 @@ Setup_C::Setup_C(long lambda) {
 const ZZ_p& Setup_C::getSecretKey() const {return sk;};
 const ZZ_p& Setup_C::getPublicKey() const {return pk;};
 
+std::vector<Setup_C> setupMultipleClients(long lambda, int n) {
+	std::vector<Setup_C> clients;
+	clients.reserve(n);
+	for (int i = 0; i < n; i++) {
+		Setup_C c = Setup_C(lambda);
+		clients.push_back(c);
+	}
+	return clients;
+}
 
 
 

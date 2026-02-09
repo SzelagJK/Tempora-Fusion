@@ -226,6 +226,7 @@ void testSetup() {
 	std::cout << "Client secret key (Phi(N)): " << C.getSecretKey() << std::endl;
 	std::vector<Setup_C> clients = setupMultipleClients(lambda, 10);
 	std::cout << "Client list check: " << clients.size() << std::endl;
+	std::cout << "	OK" << std::endl; 
 }
 
 int main() {
