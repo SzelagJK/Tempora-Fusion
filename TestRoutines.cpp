@@ -19,6 +19,7 @@
 #include "rsa.h"
 #include "helper_functions.h"
 #include "tlp.h"
+#include "setup.h"
 
 using namespace NTL;
 using namespace CryptoPP;
@@ -174,8 +175,8 @@ void testOT() {
 }
 
 void testOLE() {
-	std::cout << "\n\n\n [TEST] OLE main test\n" << std::endl;
-	int key_bits = 512;
+       	std::cout << "\n\n\n [TEST] OLE main test\n" << std::endl;
+       	int key_bits = 512; 
 	ZZ test_prime = GenPrime_ZZ(key_bits);
 	Poly_Field PF = Poly_Field(test_prime, 1);
 	OLE OLE_p = OLE(test_prime, key_bits, PF);
@@ -205,6 +206,26 @@ void testOLE_enhanced() {
 	std::cout << "Computed evaluation: " << result << std::endl;
 }
 
+void testSetup() {
+	std::cout << "\n\n [TEST] VHLC-TLP Setup" << std::endl;
+	int key_bits = 128;
+	ZZ test_prime = GenPrime_ZZ(key_bits);
+	int leader_clients = 10;
+	
+	std::cout << "Server Setup Checks" << std::endl;
+	Setup_S S = Setup_S(test_prime, leader_clients);
+	std::cout << "Leader Qty check: " << S.getLeaderQty() << std::endl;
+	S.setFieldParams(1);
+	S.generatePublicX();
+	std::cout << "Public X check: " << S.getX().length() << std::endl;
+
+	std::cout << "Client Setup Checks" << std::endl;
+	long lambda = 2048; // key bits
+	Setup_C C = Setup_C(lambda);
+	std::cout << "Client public key (N): " << C.getPublicKey() << std::endl;
+	std::cout << "Client secret key (Phi(N)): " << C.getSecretKey() << std::endl;
+}
+
 int main() {
     	//std::cout << "Running TLP tests...\n\n";
 
@@ -232,6 +253,11 @@ int main() {
 	double average_time = test_time.count()/iterations;
 	std::cout << "OLE+ average execution time: " << average_time/1000 << "ms" << std::endl;
 	std::cout << "OLE+ total execution time: " << test_time.count()/1000 << "ms" << std::endl;
+
+	// Tests for VHLC-TLP
+	
+	testSetup();
+
 
     	std::cout << "\nAll tests passed.\n";
     	return 0;

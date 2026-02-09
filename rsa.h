@@ -5,6 +5,7 @@
 #include <cryptopp/modes.h>
 #include <cryptopp/osrng.h>
 #include <cryptopp/filters.h>
+#include <vector>
 #include <cstdint>
 
 using namespace NTL;
@@ -22,6 +23,8 @@ class RSAParams {
 };
 
 RSAParams setupRSA(long lambda);
+
+std::vector<RSAParams> generateParamsSet(std::size_t n);
 
 #endif
 
