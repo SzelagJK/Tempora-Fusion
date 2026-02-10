@@ -220,7 +220,7 @@ void testSetup() {
 	std::cout << "Public X check: " << S.getX().length() << std::endl;
 
 	std::cout << "Client Setup Checks" << std::endl;
-	long lambda = 2048; // key bits
+	long lambda = 2048; // key bits for the second primitive
 	Setup_C C = Setup_C(lambda);
 	std::cout << "Client public key (N): " << C.getPublicKey() << std::endl;
 	std::cout << "Client secret key (Phi(N)): " << C.getSecretKey() << std::endl;
