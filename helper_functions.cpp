@@ -33,7 +33,7 @@ ZZ EncodeZZ_p(const ZZ_p& zz_p) {
 
 	for (size_t i = 0; i < bytesNum; i++) {
 		// extracting i-th byte and moving bits around, similar to above conversions
-		ZZ byte = t & 0xFF; 
+		ZZ byte = zz & 0xFF; 
 		out <<= 8; 
 		out += byte;
 		zz >>=  8;
@@ -50,10 +50,10 @@ SecByteBlock EncodeKeyZZ_p(const ZZ_p& k) {
 	SecByteBlock k_encoded(bytesNum); // secbyteblock, useful buffer, check docs for more
 	for (size_t i = 0; i < bytesNum; i++) {
 		// start from the last element, as low bits are processed first
-		out[bytesNum - 1 - i] = conv<unsigned long>(zz & 0xFF);
+		k_encoded[bytesNum - 1 - i] = conv<unsigned long>(zz & 0xFF);
 		zz >>= 8;
 	}
-	return out;
+	return k_encoded;
 };
 
 

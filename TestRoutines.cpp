@@ -20,6 +20,7 @@
 #include "helper_functions.h"
 #include "tlp.h"
 #include "setup.h"
+#include "prf.h"
 
 using namespace NTL;
 using namespace CryptoPP;
@@ -228,6 +229,25 @@ void testSetup() {
 	std::cout << "Client list check: " << clients.size() << std::endl;
 }
 
+void testPRF() {
+	std::cout << "\n\n [TEST] testing PRF" << std::endl;
+	int key_bits = 128;
+	ZZ test_prime = GenPrime_ZZ(key_bits);
+	ZZ_p key = to_ZZ_p(test_prime);
+	ZZ_p input1 = to_ZZ_p(conv<ZZ>(1));
+	ZZ_p input2 = to_ZZ_p(conv<ZZ>(2));
+	ZZ r1 = PRF_AES(input1, key);
+	std::cout << "R1: " << r1 << std::endl;
+	std::cout << "R1 bits: " << NumBits(r1) << std::endl;
+	
+	ZZ r1_check = PRF_AES(input1, key);
+	std::cout << "R1 check: " << r1_check << std::endl;
+	
+	ZZ r2 = PRF_AES(input2, key, 256);
+	std::cout << "R2: " << r2 << std::endl;
+	std::cout << "R2 bits: " << NumBits(r2) << std::endl;
+}
+
 int main() {
     	//std::cout << "Running TLP tests...\n\n";
 
@@ -256,6 +276,8 @@ int main() {
 	std::cout << "OLE+ average execution time: " << average_time/1000 << "ms" << std::endl;
 	std::cout << "OLE+ total execution time: " << test_time.count()/1000 << "ms" << std::endl;
 
+	// More auxilelry (requires p field)
+	testPRF();
 	// Tests for VHLC-TLP
 	
 	testSetup();
