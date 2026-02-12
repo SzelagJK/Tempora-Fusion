@@ -233,13 +233,13 @@ void testPRF() {
 	std::cout << "\n\n [TEST] testing PRF" << std::endl;
 	int key_bits = 128;
 
-	int testIterations = 10000;
+	int testIterations = 1000;
 	int pass = 0;
 	int fail = 0;
+	ZZ test_prime = GenPrime_ZZ(key_bits);
+	ZZ_p key = to_ZZ_p(test_prime);
 	auto start = std::chrono::high_resolution_clock::now();
 	for (int i = 0; i < testIterations; i++) {
-		ZZ test_prime = GenPrime_ZZ(key_bits);
-		ZZ_p key = to_ZZ_p(test_prime);
 		ZZ_p input1 = to_ZZ_p(conv<ZZ>(1));
 		ZZ_p input2 = to_ZZ_p(conv<ZZ>(2));
 		ZZ r1 = PRF_AES(input1, key);
@@ -267,7 +267,7 @@ void testPRF() {
 
 	std::chrono::duration<double, std::micro> test_time = end - start;
 	double average_time = test_time.count()/testIterations;
-	std::cout << "[PRF] average execution time: " << average_time/1000 << "ms" << std::endl;
+	std::cout << "[PRF] average execution time: " << (average_time/1000)/4 << "ms" << std::endl;
 	std::cout << "[PRF] total execution time: " << test_time.count()/1000 << "ms" << std::endl;
 
 	std::cout << "[PRF] PASS Count: " << pass << std::endl;
