@@ -20,18 +20,18 @@ ZZ commit(const ZZ_p x, const ZZ_p r) {
 
 	std::string str_from_bytes(concat_bytes.begin(), concat_bytes.end());
 	// printing "non printable" just to make sure that the string exists 
-	std::cout << "String message check (not printable): " << str_from_bytes << std::endl;
+	//std::cout << "[COMM] String message check (not printable): " << str_from_bytes << std::endl;
 
 	std::string digest;
 	StringSource(str_from_bytes, true,
 			new HashFilter(hash,
 				new HexEncoder(
 					new StringSink(digest))));
-	std::cout << "Hash check: " << digest << std::endl;
+	//std::cout << "[COMM] Hash check: " << digest << std::endl;
 	//ZZ digest_ZZ(INIT_VAL, digest.c_str(), 16)
 	ZZ digest_ZZ;
 	ZZFromBytes(digest_ZZ, reinterpret_cast<const unsigned char*>(digest.data()), digest.size());
-	std::cout << "ZZ hash check: " << digest_ZZ << std::endl;
+	//std::cout << "[COMM] ZZ hash check: " << digest_ZZ << std::endl;
 	return digest_ZZ;
 };
 

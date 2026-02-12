@@ -286,13 +286,22 @@ void testPRF() {
 	std::chrono::duration<double, std::micro> prf_time = end2 - start2;
 	double prf_avg = prf_time.count()/single_prf_iter;
 	std::cout << "\n[PRF] Avg. single PRF execution time: " << prf_avg/1000 << "ms" << std::endl; 
-	std::cout << "[PRF] total execution time: " << prf_time.count()/1000 << "ms" << std::endl;
+	std::cout << "[PRF] Total execution time: " << prf_time.count()/1000 << "ms" << std::endl;
 }
 
 void testHash() {
+	std::cout << "\n[TEST] Commitment test" << std::endl;
 	ZZ_p x = to_ZZ_p(conv<ZZ>(2234552342));
 	ZZ_p r = to_ZZ_p(conv<ZZ>(3001212113));
-	ZZ h = commit(x, r);
+	int iterations = 10000;
+	auto start = std::chrono::high_resolution_clock::now();
+	for (int i = 0; i < iterations; i++)
+		ZZ h = commit(x, r);
+	auto end = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double, std::micro> time = end - start;
+	double avg_time = time.count()/iterations;
+	std::cout << "\n[COMM] Avg. signle commitment execution time: " << avg_time/1000 << "ms" << std::endl;
+	std::cout << "[COMM] Total execution time: " << time.count()/1000 << "ms" << std::endl;
 }
 
 int main() {
