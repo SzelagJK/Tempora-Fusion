@@ -290,8 +290,8 @@ void testPRF() {
 }
 
 void testHash() {
-	ZZ_p x = to_ZZ_p(conv<ZZ>(2));
-	ZZ_p r = to_ZZ_p(conv<ZZ>(300));
+	ZZ_p x = to_ZZ_p(conv<ZZ>(2234552342));
+	ZZ_p r = to_ZZ_p(conv<ZZ>(3001212113));
 	ZZ h = commit(x, r);
 }
 

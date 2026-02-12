@@ -19,7 +19,8 @@ ZZ commit(const ZZ_p x, const ZZ_p r) {
 	std::copy(r_bytes.begin(), r_bytes.end(), concat_bytes.begin() + n_bytes[0]);
 
 	std::string str_from_bytes(concat_bytes.begin(), concat_bytes.end());
-	std::cout << "String message check: " << str_from_bytes << std::endl;
+	// printing "non printable" just to make sure that the string exists 
+	std::cout << "String message check (not printable): " << str_from_bytes << std::endl;
 
 	std::string digest;
 	StringSource(str_from_bytes, true,
