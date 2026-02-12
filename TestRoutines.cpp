@@ -21,6 +21,7 @@
 #include "tlp.h"
 #include "setup.h"
 #include "prf.h"
+#include "commitment.h"
 
 using namespace NTL;
 using namespace CryptoPP;
@@ -249,11 +250,11 @@ void testPRF() {
 		ZZ r1_check = PRF_AES(input1, key);
 		//std::cout << "R1 check: " << r1_check << std::endl;
 		
-		ZZ r2 = PRF_AES(input2, key, 256);
+		ZZ r2 = PRF_AES(input2, key);
 		//std::cout << "R2: " << r2 << std::endl;
 		//std::cout << "R2 bits: " << NumBits(r2) << std::endl;
 
-		ZZ r2_check = PRF_AES(input2, key, 256);
+		ZZ r2_check = PRF_AES(input2, key);
 		//std::cout << "R2 check: " << r2_check << std::endl;
 		if (r1_check == r1 && r2_check == r2) {
 			//std::cout << "PASS" << std::endl;
@@ -273,6 +274,25 @@ void testPRF() {
 	std::cout << "[PRF] PASS Count: " << pass << std::endl;
 	std::cout << "[PRF] FAIL Count: " << fail << std::endl;
 	std::cout << "[PRF] Pass rate (%): " << 100*((double)pass/(pass+fail)) << std::endl;
+
+	// Unit test for a single prf invocation
+	auto start2 = std::chrono::high_resolution_clock::now();
+	ZZ_p input3 = to_ZZ_p(3);
+	int single_prf_iter = 100000;
+	for (int i = 0; i < single_prf_iter; i++) {
+		ZZ r3 = PRF_AES(input3, key);
+	}
+	auto end2 = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double, std::micro> prf_time = end2 - start2;
+	double prf_avg = prf_time.count()/single_prf_iter;
+	std::cout << "\n[PRF] Avg. single PRF execution time: " << prf_avg/1000 << "ms" << std::endl; 
+	std::cout << "[PRF] total execution time: " << prf_time.count()/1000 << "ms" << std::endl;
+}
+
+void testHash() {
+	ZZ_p x = to_ZZ_p(conv<ZZ>(2));
+	ZZ_p r = to_ZZ_p(conv<ZZ>(300));
+	ZZ h = commit(x, r);
 }
 
 int main() {
@@ -305,6 +325,9 @@ int main() {
 
 	// More auxilelry (requires p field)
 	testPRF();
+
+	testHash();
+
 	// Tests for VHLC-TLP
 	
 	//testSetup();

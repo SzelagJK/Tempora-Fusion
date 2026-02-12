@@ -14,18 +14,18 @@ ZZ PRF_AES(const ZZ_p& x, const ZZ_p& key, int outputSize) {
 	prf_bytes.reserve(blocks * BLOCK);
 
 	assert(NumBytes(enc_x) <= 8);
-	// ^note: AES block hold 16 bytes, when applying counter mode, 8 of those bytes will be decided to the counter, leaving remaining 8 to the encoding- so just remember for the input x to not exceed value of 8 bytes
+	// ^note: AES block are processed with 16 bytes, when applying counter mode, 8 of those bytes will be decided to the counter, leaving remaining 8 to the encoding- so just remember for the input x to not exceed value of 8 bytes
 	// repeat for however many aes blocks are needed, applies counter mode by default
 	for (size_t i = 0; i < blocks; i++) {
 		byte block[BLOCK] = {0}; 
 
 		// ZZ input encoding byte representation 
 		ZZ t = enc_x;
-		for (int j = BLOCK - 1; j >= 0; j--) {
+		for (int j = BLOCK - 1; j >= BLOCK/2; j--) {
 			block[j] = conv<unsigned long>(t & 0xFF);
 			t >>= 8;
 		}
-		// first 8 bytes are dedicated to the counter, overwriting first 8 
+		 
 		uint64_t ctr = i;
 		for (int j = 0; j < 8; j++) {
     			block[j] = (ctr >> (8 * (7 - j))) & 0xFF;
@@ -48,7 +48,3 @@ ZZ PRF_AES(const ZZ_p& x, const ZZ_p& key, int outputSize) {
 	return result;
 };
 
-// NOTES FOR TOMORROW: implement prf with arbitrary output size, refer to notes made before, try to reuse alerady implemented functions (no point of reimplementing encoding helpers, unless necessary)
-// check where exactly the 2nd PRF would be used, would be useful to know what lenght will it be, refer to the other paper
-// implement commitment functions, with that, hashes (shouldn't be too bad)
-// test both
