@@ -31,12 +31,10 @@ ZZ EncodeZZ_p(const ZZ_p& zz_p) {
 	size_t bitsNum = NumBits(ZZ_p::modulus());
 	size_t bytesNum = (bitsNum + 7) /8;
 
-	for (size_t i = 0; i < bytesNum; i++) {
-		// extracting i-th byte and moving bits around, similar to above conversions
-		ZZ byte = zz & 0xFF; 
-		out <<= 8; 
-		out += byte;
-		zz >>=  8;
+	for (int i = bytesNum; i >= 0; i--) {
+		// extracting i-th byte from the right, similar to above conversions
+		ZZ byte = (zz >> (8*i)) & 0xFF; // start from highest i to get rightmost byte
+		out += byte; 
 	}
 	return out;
 };

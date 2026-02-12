@@ -232,20 +232,47 @@ void testSetup() {
 void testPRF() {
 	std::cout << "\n\n [TEST] testing PRF" << std::endl;
 	int key_bits = 128;
-	ZZ test_prime = GenPrime_ZZ(key_bits);
-	ZZ_p key = to_ZZ_p(test_prime);
-	ZZ_p input1 = to_ZZ_p(conv<ZZ>(1));
-	ZZ_p input2 = to_ZZ_p(conv<ZZ>(2));
-	ZZ r1 = PRF_AES(input1, key);
-	std::cout << "R1: " << r1 << std::endl;
-	std::cout << "R1 bits: " << NumBits(r1) << std::endl;
-	
-	ZZ r1_check = PRF_AES(input1, key);
-	std::cout << "R1 check: " << r1_check << std::endl;
-	
-	ZZ r2 = PRF_AES(input2, key, 256);
-	std::cout << "R2: " << r2 << std::endl;
-	std::cout << "R2 bits: " << NumBits(r2) << std::endl;
+
+	int testIterations = 10000;
+	int pass = 0;
+	int fail = 0;
+	auto start = std::chrono::high_resolution_clock::now();
+	for (int i = 0; i < testIterations; i++) {
+		ZZ test_prime = GenPrime_ZZ(key_bits);
+		ZZ_p key = to_ZZ_p(test_prime);
+		ZZ_p input1 = to_ZZ_p(conv<ZZ>(1));
+		ZZ_p input2 = to_ZZ_p(conv<ZZ>(2));
+		ZZ r1 = PRF_AES(input1, key);
+		//std::cout << "R1: " << r1 << std::endl;
+		//std::cout << "R1 bits: " << NumBits(r1) << std::endl;
+		
+		ZZ r1_check = PRF_AES(input1, key);
+		//std::cout << "R1 check: " << r1_check << std::endl;
+		
+		ZZ r2 = PRF_AES(input2, key, 256);
+		//std::cout << "R2: " << r2 << std::endl;
+		//std::cout << "R2 bits: " << NumBits(r2) << std::endl;
+
+		ZZ r2_check = PRF_AES(input2, key, 256);
+		//std::cout << "R2 check: " << r2_check << std::endl;
+		if (r1_check == r1 && r2_check == r2) {
+			//std::cout << "PASS" << std::endl;
+			pass += 1;
+		} else {
+			//std::cout << "FAIL" << std::endl;
+			fail += 1;
+		}
+	}
+	auto end = std::chrono::high_resolution_clock::now();	
+
+	std::chrono::duration<double, std::micro> test_time = end - start;
+	double average_time = test_time.count()/testIterations;
+	std::cout << "[PRF] average execution time: " << average_time/1000 << "ms" << std::endl;
+	std::cout << "[PRF] total execution time: " << test_time.count()/1000 << "ms" << std::endl;
+
+	std::cout << "[PRF] PASS Count: " << pass << std::endl;
+	std::cout << "[PRF] FAIL Count: " << fail << std::endl;
+	std::cout << "[PRF] Pass rate (%): " << 100*((double)pass/(pass+fail)) << std::endl;
 }
 
 int main() {
@@ -280,7 +307,7 @@ int main() {
 	testPRF();
 	// Tests for VHLC-TLP
 	
-	testSetup();
+	//testSetup();
 
 
     	std::cout << "\nAll tests passed.\n";

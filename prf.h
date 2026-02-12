@@ -11,6 +11,7 @@
 #include <vector>
 #include <iostream>
 #include <cstring>
+#include <cassert>
 
 #include "helper_functions.h"
 
