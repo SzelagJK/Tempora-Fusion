@@ -18,6 +18,6 @@
 using namespace NTL;
 using namespace CryptoPP;
 
-ZZ PRF_AES(const ZZ_p& x, const ZZ_p& key, int outputSize = 128); // will initiate "counter mode" when >128 and truncate if < 128 
+ZZ PRF_AES(const ZZ_p& x, const ZZ key, int outputSize = 128); // will initiate "counter mode" and truncate if n % 128 != 0 
 
 #endif 

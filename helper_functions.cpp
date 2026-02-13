@@ -40,8 +40,8 @@ ZZ EncodeZZ_p(const ZZ_p& zz_p) {
 };
 
 // used mainly in PRF to accept ZZ_p keys (check prf.cpp/h)
-SecByteBlock EncodeKeyZZ_p(const ZZ_p& k) {
-	ZZ zz = rep(k);
+SecByteBlock EncodeKeyZZ(const ZZ k) {
+	ZZ zz = k; // was previously ZZ_p, simplify later
 	size_t bitsNum = NumBits(ZZ_p::modulus());
 	size_t bytesNum = (bitsNum + 7) / 8;
 

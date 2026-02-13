@@ -4,7 +4,7 @@ ZZ commit(const ZZ_p x, const ZZ_p r) {
 	assert(!IsZero(ZZ_p::modulus()));	
 	
 	BLAKE3 hash;
-	// using bytes instead of strong for safety
+	// using bytes instead of string for safety
 	ZZ x_rep = rep(x);
 	ZZ r_rep = rep(r);
 	long n_bytes[2] = {NumBytes(x_rep), NumBytes(r_rep)};

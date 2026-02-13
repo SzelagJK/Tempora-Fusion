@@ -15,7 +15,7 @@ ZZ messageToZZ(const std::string& m);
 std::string ZZToMessage(ZZ z);
 size_t FieldByteLength();
 ZZ EncodeZZ_p(const ZZ_p& zz);
-SecByteBlock EncodeKeyZZ_p(const ZZ_p& key);
+SecByteBlock EncodeKeyZZ(const ZZ key);
 
 #endif
 

@@ -238,7 +238,7 @@ void testPRF() {
 	int pass = 0;
 	int fail = 0;
 	ZZ test_prime = GenPrime_ZZ(key_bits);
-	ZZ_p key = to_ZZ_p(test_prime);
+	ZZ key = test_prime;
 	auto start = std::chrono::high_resolution_clock::now();
 	for (int i = 0; i < testIterations; i++) {
 		ZZ_p input1 = to_ZZ_p(conv<ZZ>(1));

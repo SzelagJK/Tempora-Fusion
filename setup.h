@@ -22,7 +22,8 @@ class Setup_S {
 		// Auxillery
 		std::vector<Poly_Field> PF;
 	public:
-		Setup_S(ZZ p, int t);
+		// here, t represents t^** (Section 3.1, Notations), as t is defined to be the threshold of non-corrupt leaders (so we can skip it here)
+		Setup_S(ZZ p, int t);  
 		const int getLeaderQty() const;
 		const ZZ& getPrime() const;
 		const Poly_Field& getPF() const;

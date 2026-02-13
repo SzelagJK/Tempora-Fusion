@@ -41,6 +41,7 @@ Setup_C::Setup_C(long lambda) {
 const ZZ_p& Setup_C::getSecretKey() const {return sk;};
 const ZZ_p& Setup_C::getPublicKey() const {return pk;};
 
+// when defining n, generate at least t+2 clients, otherwise the number of clients will be smaller than required (refer to the paper) 
 std::vector<Setup_C> setupMultipleClients(long lambda, int n) {
 	std::vector<Setup_C> clients;
 	clients.reserve(n);
