@@ -54,4 +54,13 @@ SecByteBlock EncodeKeyZZ(const ZZ k) {
 	return k_encoded;
 };
 
+ZZ_p EncodeAsPoly(ZZ x, ZZ m) {
+	ZZ_p pi = to_ZZ_p(x + m);
+	return pi;
+};
+
+ZZ_p EncodeAsPoly(ZZ_p x, ZZ m) {
+	ZZ_p pi = x + to_ZZ_p(m);
+	return pi;
+};
 

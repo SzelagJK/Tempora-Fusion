@@ -18,5 +18,6 @@ using namespace CryptoPP;
 // where lambda might not be the same size as the security parameter defined in other parts of the protocol
 // (hence also the params are zz);
 ZZ commit(const ZZ_p x, const ZZ_p r);
+ZZ commit(const ZZ x, const ZZ r);
 
 #endif
