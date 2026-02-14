@@ -226,7 +226,7 @@ void testSetup() {
 	Setup_C C = Setup_C(lambda);
 	std::cout << "Client public key (N): " << C.getPublicKey() << std::endl;
 	std::cout << "Client secret key (Phi(N)): " << C.getSecretKey() << std::endl;
-	std::vector<Setup_C> clients = setupMultipleClients(lambda, 10);
+	std::vector<Setup_C> clients = setupMultipleClients(lambda, leader_clients + 2); // min treshold: t+2
 	std::cout << "Client list check: " << clients.size() << std::endl;
 }
 
@@ -339,7 +339,7 @@ int main() {
 
 	// Tests for VHLC-TLP
 	
-	//testSetup();
+	testSetup();
 
 
     	std::cout << "\nAll tests passed.\n";
