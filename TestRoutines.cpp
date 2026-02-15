@@ -313,7 +313,7 @@ void testGenPuzzles() {
 	int key_bits = 128;
 	ZZ test_prime = GenPrime_ZZ(key_bits);
 	std::cout << "[Gen Puzzles] Log2(p): " << key_bits << ", prime chosen: " << test_prime << std::endl;
-	int leader_num = 5;
+	int leader_num = 20;
 	std::cout << "[GenPuzzles] Num of leaders: " << leader_num << std::endl;  	
 	Setup_S S = Setup_S(test_prime, leader_num);
 	S.setFieldParams();
@@ -322,28 +322,40 @@ void testGenPuzzles() {
 	std::cout << "[GenPuzzles] Public X check: " << X << std::endl;
 	long lambda = 2048; // key bits for the second primitive
 	std::cout << "[GenPuzzles] Clients puzzle log2(p): " << lambda << std::endl;
-	std::vector<Setup_C> clients = setupMultipleClients(lambda, leader_num + 2); // min treshold: t+2
+	int clientsCount = leader_num + 80;
+	std::vector<Setup_C> clients = setupMultipleClients(lambda, clientsCount); // min treshold: t+2
 	std::cout << "[GenPuzzles] Client list check: " << clients.size() << std::endl;
 	// generate few messages for testing
 	Vec<ZZ> M;
-	for (int i = 0; i < leader_num + 2; i++) {
+	for (int i = 0; i < clientsCount; i++) {
 		ZZ m = RandomBits_ZZ(256);
 		std::cout << "Message " << i << ": " << m << std::endl;
 		M.append(m);
 	}
 	// the same with random delta values
 	std::vector<int> delta;
-	for (int i = 0; i < leader_num + 2; i++) {
+	for (int i = 0; i < clientsCount; i++) {
 		int d = static_cast<int>(RandomBnd(900) + 100);
 		std::cout << "Random delta " << i << ": " << d << std::endl;
 		delta.push_back(d);
 	}
 	// GenPuzzles
 	int max_ss = 1024;
-	VHLCTLP_GenPuzzles PuzzleGenerator(M, clients, test_prime, X, leader_num, delta, max_ss);
+	auto start = std::chrono::high_resolution_clock::now();
+	VHLCTLP_GenPuzzles PuzzleGenerator(M, clients, test_prime, X, leader_num, clientsCount, delta, max_ss);
+	auto end_puzzleObjectSetup = std::chrono::high_resolution_clock::now();
 	GenPuzzlesOutput output = PuzzleGenerator.generate_and_publish();
-	std::cout << "[GenPuzzles] Generator check (size): " << output.o_vectors.length() << std::endl;
-	std::cout << "[GenPuzzles] Generator check (puzzle u=0, i=0): " << output.o_vectors[0][0] << std::endl;
+	auto end_puzzleGeneration = std::chrono::high_resolution_clock::now();
+	std::cout << "\n[GenPuzzles] Generator check (size): " << output.o_vectors.length() << std::endl;
+	std::cout << "[GenPuzzles] Generator check (puzzle u=0): " << output.o_vectors[0] << std::endl;
+
+	std::chrono::duration<double, std::micro> time_objectSetup = end_puzzleObjectSetup - start;
+	std::chrono::duration<double, std::micro> time_puzzleGeneration = end_puzzleGeneration - end_puzzleObjectSetup;
+	double singleClientTime = time_puzzleGeneration.count()/clientsCount;
+	std::cout << "\n[GenPuzzles] Puzzle object setup time: " << time_objectSetup.count()/1000 << "ms" << std::endl; 
+	std::cout << "[GenPuzzles] Average puzzle generation time: " << singleClientTime/1000 <<  "ms" << std::endl;
+	std::cout << "[GenPuzzles] Total puzzle generation time: " << time_puzzleGeneration.count()/1000 << "ms" << std::endl;
+
 	std::cout << "		OK\n";
 
 }
@@ -383,7 +395,7 @@ int main() {
 
 	// Tests for VHLC-TLP
 	
-	testSetup();
+	//testSetup();
 
 	testGenPuzzles();
 

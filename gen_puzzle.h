@@ -7,6 +7,7 @@
 #include <vector>
 #include <iostream>
 #include <cassert>
+#include <cmath>
 
 #include "tlp.h"
 #include "helper_functions.h"
@@ -35,7 +36,8 @@ class VHLCTLP_GenPuzzles {
 		// Corrsponds to pk_s: (p, X, t)
 		const ZZ p;
 		Vec<ZZ_p> X;
-		const int t;
+		const int t; // leaders
+		const int clientsCount; 
 		// delta_u
 		std::vector<int> delta;
 		int max_ss; // based on the servers max squared sequential operations, ignore individual users
@@ -58,7 +60,15 @@ class VHLCTLP_GenPuzzles {
 	      	void encryptMessages();
 		void commitMessages();
 	public:
-		VHLCTLP_GenPuzzles(Vec<ZZ> M, std::vector<Setup_C> K, ZZ p, Vec<ZZ_p> X, int t, std::vector<int> delta, int max_ss);
+		VHLCTLP_GenPuzzles(
+				Vec<ZZ> M, 
+				std::vector<Setup_C> K, 
+				ZZ p, 
+				Vec<ZZ_p> X, 
+				int t, 
+				int clientsCount, 
+				std::vector<int> delta, 
+				int max_ss);
 		const GenPuzzlesOutput generate_and_publish();
 };
 

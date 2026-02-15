@@ -8,6 +8,7 @@ VHLCTLP_GenPuzzles::VHLCTLP_GenPuzzles(
 		ZZ p, 
 		Vec<ZZ_p> X, 
 		int t, 
+		int clientsCount,
 		std::vector<int> delta, 
 		int max_ss) : 
 	M(std::move(M)), 
@@ -15,6 +16,7 @@ VHLCTLP_GenPuzzles::VHLCTLP_GenPuzzles(
 	p(std::move(p)), 
 	X(std::move(X)), 
 	t(std::move(t)), 
+	clientsCount(std::move(clientsCount)),
 	delta(std::move(delta)), 
 	max_ss(std::move(max_ss)) {}
 
@@ -31,6 +33,7 @@ void VHLCTLP_GenPuzzles::checkParams() const {
 
 // VHLCTLP: 3b
 void VHLCTLP_GenPuzzles::generateSecretKeys() {
+	std::cout << "\n[GenPuzzles] Generating Secret Keys" << std::endl;
 	Vec<Vec<ZZ>> keys;
 	Vec<ZZ> tmp_T;
 	Vec<ZZ> tmp_N;
@@ -46,11 +49,15 @@ void VHLCTLP_GenPuzzles::generateSecretKeys() {
 		PowerMod(a, conv<ZZ>(2), conv<ZZ>(T_u), rep(K[i].getSecretKey()));
 		// generate master key (3b-ii)
 		ZZ n = rep(K[i].getPublicKey());
-		ZZ r = RandomBits_ZZ(NumBits(n));
+		ZZ r;
+		do {
+			r = RandomBits_ZZ(NumBits(n));
+			r %= n;
+		} while (GCD(r, n) != 1); // ensuring that r is reducable, later check if can be optimised with how r is randomised
 		tmp_N.append(n);
 		tmp_R.append(r);
 		ZZ mk;
-		PowerMod(mk, r, a, rep(K[i].getPublicKey()));
+		PowerMod(mk, r, a, n);
 		key.append(mk);
 		// derive k and s (3b-iii)
 		ZZ k = PRF_AES(conv<ZZ_p>(1), mk); // consider changing the x param datatype to ZZ later  
@@ -72,9 +79,10 @@ void VHLCTLP_GenPuzzles::generateSecretKeys() {
 // VHLCTLP: 3c
 // generates blinding factors for all clients? check again if that should be the case
 void VHLCTLP_GenPuzzles::generateBlindingFactors() {
+	std::cout << "[GenPuzzles] Generating Blinding Factors" << std::endl;
 	Vec<Vec<ZZ>> tmp_blindingFactors;
 	// we use private secretKeys Vec object
-	for (int i = 0; i < secretKeys.length(); i++) {
+	for (int i = 0; i < t+2; i++) {
 		Vec<ZZ> blindingPair;
 		ZZ z = PRF_AES(conv<ZZ_p>(i), secretKeys[i][1]);
 		ZZ w = PRF_AES(conv<ZZ_p>(i), secretKeys[i][2]);
@@ -88,6 +96,7 @@ void VHLCTLP_GenPuzzles::generateBlindingFactors() {
 
 // VHLCTLP: 3d
 void VHLCTLP_GenPuzzles::encodeMessages() {
+	std::cout << "[GenPuzzles] Encoding messages as polynomials" << std::endl;
 	// intuition: "encoded messages" here refer to the computed y-coordinates for each message m over coordinates of X (t_dash y-coordinates to be precise) 
 	Vec<Vec<ZZ_p>> tmp_encodedMessages;
 	for (int i = 0; i < M.length(); i++) {
@@ -104,11 +113,13 @@ void VHLCTLP_GenPuzzles::encodeMessages() {
 
 // VHLCTLP: 3e
 void VHLCTLP_GenPuzzles::encryptMessages() {
+	std::cout << "[GenPuzzles] Encrypting messages" << std::endl;
 	Vec<Vec<ZZ_p>> tmp_encryptedMessages;
+	// for each users encoded message (which is t+2 y-coords each), encrypt using corresponding blinding factors (also t+2)
 	for (int i = 0; i < encodedMessages.length(); i++) {
 		Vec<ZZ_p> o_vector;
 		for (int j = 0; j < encodedMessages[i].length(); j++) {
-			ZZ_p o = to_ZZ_p(blindingFactors[i][1] * (rep(encodedMessages[i][j]) + blindingFactors[i][0]));
+			ZZ_p o = to_ZZ_p(blindingFactors[j][1] * (rep(encodedMessages[i][j]) + blindingFactors[j][0]));
 			o_vector.append(o);
 		}
 		tmp_encryptedMessages.append(o_vector);
@@ -118,8 +129,9 @@ void VHLCTLP_GenPuzzles::encryptMessages() {
 
 // VHLCTLP: 3f
 void VHLCTLP_GenPuzzles::commitMessages() {
+	std::cout << "[GenPuzzles] Commiting messages" << std::endl;
 	Vec<ZZ> tmp_commitments;
-	for (int i = 0; M.length(); i++) {
+	for (int i = 0; i < M.length(); i++) {
 		ZZ comm = commit(M[i], secretKeys[i][0]);
 		tmp_commitments.append(comm);
 	}
@@ -152,6 +164,8 @@ const GenPuzzlesOutput VHLCTLP_GenPuzzles::generate_and_publish() {
 	PRMContainer tmp_PRM;
 	tmp_PRM.SP = SP;
 	tmp_PRM.PP = tmp_PP;
+
+	std::cout << "[GenPuzzles] Puzzle generation complete" << std::endl;
 
 	return out;
 }
