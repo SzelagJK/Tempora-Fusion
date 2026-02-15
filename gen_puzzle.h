@@ -13,13 +13,25 @@
 #include "setup.h"
 #include "commitment.h"
 
-// outputs a vector of puzzles
+
+struct GenPuzzlesOutput {
+	Vec<Vec<ZZ_p>> o_vectors; // all puzzles
+	Vec<Vec<ZZ>> PP; // public params of all clients 
+};
+
+struct PRMContainer {
+	Vec<Vec<ZZ>> SP;
+	Vec<Vec<ZZ>> PP;
+};
+
+// Class handles generation of multiple puzzles at the same time provided a list of clients, their keys, and corresponding messages
+// Note for future self: implement the same outine but for a single puzzle generation (for now this will suffice)
 class VHLCTLP_GenPuzzles {
 	private:
 		// Self-note: use helper functions to encode as ZZ
 		const Vec<ZZ> M;
-                // Corresponds to K_u (vector of user keys), use GenerateMultipleClients
-                Vec<Setup_C> K;
+                // Corresponds to all K_u (vector of user keys), use GenerateMultipleClients
+		std::vector<Setup_C> K;
 		// Corrsponds to pk_s: (p, X, t)
 		const ZZ p;
 		Vec<ZZ_p> X;
@@ -33,30 +45,22 @@ class VHLCTLP_GenPuzzles {
 		Vec<ZZ> N; // Clients puzzle public keys
 		Vec<ZZ> R; // All r_u bases
 		Vec<Vec<ZZ>> blindingFactors;
-		Vec<ZZ_p> encodedMessages;
-		Vec<ZZ_p> encryptedMessages; // corresponds to "puzzles"
+		Vec<Vec<ZZ_p>> encodedMessages;
+		Vec<Vec<ZZ_p>> encryptedMessages; // corresponds to "puzzles"
 		Vec<ZZ> messageCommitments;
 		Vec<Vec<ZZ>> SP; // secret parameters of each client, refer directly to this object to get them separetly
 		PRMContainer PRM; // all prm_u = (sp_u, pp_u), use only for clients
-	public:
-		VHLCTLP_GenPuzzles(Vec<ZZ> M, Vec<Setup_C> K, ZZ p, Vec<ZZ_p> X, int t, std::vector<int> delta, int max_ss);
+
 		void checkParams() const;
 		void generateSecretKeys();
 		void generateBlindingFactors();
 		void encodeMessages();
 	      	void encryptMessages();
 		void commitMessages();
-		const GenPuzzlesOutput generate_and_publish() const;
+	public:
+		VHLCTLP_GenPuzzles(Vec<ZZ> M, std::vector<Setup_C> K, ZZ p, Vec<ZZ_p> X, int t, std::vector<int> delta, int max_ss);
+		const GenPuzzlesOutput generate_and_publish();
 };
 
-struct GenPuzzlesOutput {
-	Vec<ZZ> o_vector; // all puzzles
-	Vec<Vec<ZZ>> PP; // public params of all clients 
-};
-
-struct PRMContainer {
-	Vec<Vec<ZZ>> SP;
-	Vec<Vec<ZZ>> PP;
-};
 
 #endif

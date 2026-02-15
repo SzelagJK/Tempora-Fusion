@@ -2,6 +2,7 @@
 #include <cryptopp/modes.h>
 #include <cryptopp/osrng.h>
 #include <cryptopp/filters.h>
+#include <NTL/BasicThreadPool.h>
 #include <cassert>
 #include <chrono>
 #include <vector>
@@ -19,9 +20,10 @@
 #include "rsa.h"
 #include "helper_functions.h"
 #include "tlp.h"
-#include "setup.h"
 #include "prf.h"
 #include "commitment.h"
+#include "setup.h"
+#include "gen_puzzle.h"
 
 using namespace NTL;
 using namespace CryptoPP;
@@ -304,6 +306,48 @@ void testHash() {
 	std::cout << "[COMM] Total execution time: " << time.count()/1000 << "ms" << std::endl;
 }
 
+void testGenPuzzles() {
+	std::cout << "\n\n[TEST] VHLC-TLP Geneate Puzzles" << std::endl;
+	// Setup
+	std::cout << "[GenPuzzles] Setting up server and client params" << std::endl;
+	int key_bits = 128;
+	ZZ test_prime = GenPrime_ZZ(key_bits);
+	std::cout << "[Gen Puzzles] Log2(p): " << key_bits << ", prime chosen: " << test_prime << std::endl;
+	int leader_num = 5;
+	std::cout << "[GenPuzzles] Num of leaders: " << leader_num << std::endl;  	
+	Setup_S S = Setup_S(test_prime, leader_num);
+	S.setFieldParams();
+	S.generatePublicX();
+	Vec<ZZ_p> X = S.getX();
+	std::cout << "[GenPuzzles] Public X check: " << X << std::endl;
+	long lambda = 2048; // key bits for the second primitive
+	std::cout << "[GenPuzzles] Clients puzzle log2(p): " << lambda << std::endl;
+	std::vector<Setup_C> clients = setupMultipleClients(lambda, leader_num + 2); // min treshold: t+2
+	std::cout << "[GenPuzzles] Client list check: " << clients.size() << std::endl;
+	// generate few messages for testing
+	Vec<ZZ> M;
+	for (int i = 0; i < leader_num + 2; i++) {
+		ZZ m = RandomBits_ZZ(256);
+		std::cout << "Message " << i << ": " << m << std::endl;
+		M.append(m);
+	}
+	// the same with random delta values
+	std::vector<int> delta;
+	for (int i = 0; i < leader_num + 2; i++) {
+		int d = static_cast<int>(RandomBnd(900) + 100);
+		std::cout << "Random delta " << i << ": " << d << std::endl;
+		delta.push_back(d);
+	}
+	// GenPuzzles
+	int max_ss = 1024;
+	VHLCTLP_GenPuzzles PuzzleGenerator(M, clients, test_prime, X, leader_num, delta, max_ss);
+	GenPuzzlesOutput output = PuzzleGenerator.generate_and_publish();
+	std::cout << "[GenPuzzles] Generator check (size): " << output.o_vectors.length() << std::endl;
+	std::cout << "[GenPuzzles] Generator check (puzzle u=0, i=0): " << output.o_vectors[0][0] << std::endl;
+	std::cout << "		OK\n";
+
+}
+
 int main() {
     	//std::cout << "Running TLP tests...\n\n";
 
@@ -341,6 +385,7 @@ int main() {
 	
 	testSetup();
 
+	testGenPuzzles();
 
     	std::cout << "\nAll tests passed.\n";
     	return 0;

@@ -29,7 +29,7 @@ class Setup_S {
 		const Poly_Field& getPF() const;
 		const Vec<ZZ_p>& getX() const;
 		// set, not return, easier to work with 
-		const void setFieldParams(int d);
+		const void setFieldParams(int d = 1);
 		const void generatePublicX();  					      
 };
 

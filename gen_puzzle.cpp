@@ -4,7 +4,7 @@
 
 VHLCTLP_GenPuzzles::VHLCTLP_GenPuzzles(
 		Vec<ZZ> M,  
-		Vec<Setup_C> K, // Setup_C conatins both pk and sk
+		std::vector<Setup_C> K, 
 		ZZ p, 
 		Vec<ZZ_p> X, 
 		int t, 
@@ -36,7 +36,7 @@ void VHLCTLP_GenPuzzles::generateSecretKeys() {
 	Vec<ZZ> tmp_N;
 	Vec<ZZ> tmp_R;
 	Vec<Vec<ZZ>> tmp_SP;
-	for (int i = 0; i < K.length(); i++) {
+	for (int i = 0; i < K.size(); i++) {
 		Vec<ZZ> key;
 		Vec<ZZ> sp_u; // for separate containment of SP
 		// set exponent (3b-i)
@@ -70,6 +70,7 @@ void VHLCTLP_GenPuzzles::generateSecretKeys() {
 }
 
 // VHLCTLP: 3c
+// generates blinding factors for all clients? check again if that should be the case
 void VHLCTLP_GenPuzzles::generateBlindingFactors() {
 	Vec<Vec<ZZ>> tmp_blindingFactors;
 	// we use private secretKeys Vec object
@@ -87,11 +88,15 @@ void VHLCTLP_GenPuzzles::generateBlindingFactors() {
 
 // VHLCTLP: 3d
 void VHLCTLP_GenPuzzles::encodeMessages() {
-	// intuition: "encoded messages" here refer to the computed y-coordinates for each message m over corresponding root in X using pi(x) 
-	Vec<ZZ_p> tmp_encodedMessages;
+	// intuition: "encoded messages" here refer to the computed y-coordinates for each message m over coordinates of X (t_dash y-coordinates to be precise) 
+	Vec<Vec<ZZ_p>> tmp_encodedMessages;
 	for (int i = 0; i < M.length(); i++) {
+		Vec<ZZ_p> enc;
 		// pi(x) = x + m mod p where x is an element from X (roots) and p is from sk_s (should be the ZZ_p::modulus()) 
-		ZZ_p enc = EncodeAsPoly(X[i], M[i]);
+		for (int j = 0; j < t+2; j++) {
+			ZZ_p phi_i = EncodeAsPoly(X[j], M[i]);
+			enc.append(phi_i);
+		}
 		tmp_encodedMessages.append(enc);
 	}
 	encodedMessages = tmp_encodedMessages;
@@ -99,10 +104,14 @@ void VHLCTLP_GenPuzzles::encodeMessages() {
 
 // VHLCTLP: 3e
 void VHLCTLP_GenPuzzles::encryptMessages() {
-	Vec<ZZ_p> tmp_encryptedMessages;
+	Vec<Vec<ZZ_p>> tmp_encryptedMessages;
 	for (int i = 0; i < encodedMessages.length(); i++) {
-		ZZ_p o = to_ZZ_p(blindingFactors[i][1] * (rep(encodedMessages[i]) + blindingFactors[i][0]));
-		tmp_encryptedMessages.append(o);
+		Vec<ZZ_p> o_vector;
+		for (int j = 0; j < encodedMessages[i].length(); j++) {
+			ZZ_p o = to_ZZ_p(blindingFactors[i][1] * (rep(encodedMessages[i][j]) + blindingFactors[i][0]));
+			o_vector.append(o);
+		}
+		tmp_encryptedMessages.append(o_vector);
 	}
 	encryptedMessages = tmp_encryptedMessages;
 }
@@ -119,17 +128,18 @@ void VHLCTLP_GenPuzzles::commitMessages() {
 
 // VHLCTLP: 3g
 // Repesent all ZZ_p as ZZ for containment puposes
-const GenPuzzlesOutput VHLCTLP_GenPuzzles::generate_and_publish() const {
+const GenPuzzlesOutput VHLCTLP_GenPuzzles::generate_and_publish() {
 	GenPuzzlesOutput out;
+	Vec<Vec<ZZ>> tmp_PP;
 	
 	checkParams();
 	generateSecretKeys();
-	geneateBlindingFactors();
+	generateBlindingFactors();
 	encodeMessages();
 	encryptMessages();
 	commitMessages();
 
-	out.o_vector = encryptedMessages;
+	out.o_vectors = encryptedMessages;
 
 	tmp_PP.append(messageCommitments);
 	tmp_PP.append(T);
@@ -138,6 +148,7 @@ const GenPuzzlesOutput VHLCTLP_GenPuzzles::generate_and_publish() const {
 	out.PP = tmp_PP;
 
 	// set PRM
+	// do something with it later
 	PRMContainer tmp_PRM;
 	tmp_PRM.SP = SP;
 	tmp_PRM.PP = tmp_PP;
