@@ -11,7 +11,7 @@
 
 // here we willi nclude both coin toss and the deterministic fucntion G
 
-ZZ coinToss(int clientsNum, int outputLen);
+ZZ coinToss(int clientsNum, int outputLen = 128);
 std::vector<int> determineLeaderIndices(int leaderCount, int clientCount, ZZ r_hat);
 
 #endif

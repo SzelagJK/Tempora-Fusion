@@ -11,6 +11,7 @@
 #include "setup.h"
 #include "gen_puzzle.h"
 #include "coin_toss.h"
+#include "prf.h"
 
 using namespace NTL;
 
@@ -47,10 +48,18 @@ class LinearCombinations {
 	private:
 		S_LinearCombInput S;
 		std::vector<C_LinearCombInput> C_vector;
+		PRMContainer PRMs;
+		int t;
+		int clientsCount;
 		std::vector<int> selected_leaders; // here is where coin_toss comes in
+		Vec<Vec<ZZ>> tK; // temporary secret keys
 	public:
-		LinearCombinations(S_LinearCombInput S, std::vector<C_LinearCombInput> C_vector, PRMContainer PRMs);
+		LinearCombinations(S_LinearCombInput S, std::vector<C_LinearCombInput> C_vector, PRMContainer PRMs, int t);
+		void selectLeaders();
+		void grantComputations();
 };
+
+
 
 
 #endif

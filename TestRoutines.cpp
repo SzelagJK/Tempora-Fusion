@@ -363,7 +363,7 @@ void testGenPuzzles() {
 }
 
 void testCoinToss() {
-	std::cout << "\n[TEST] Coin toss protocol"
+	std::cout << "\n[TEST] Coin toss protocol";
 	ZZ r_hat = coinToss(20, 128);
 	std::vector<int> indices = determineLeaderIndices(10, 20, r_hat);
 	std::cout << "[Coin Toss] r_hat: " << r_hat << std::endl;
