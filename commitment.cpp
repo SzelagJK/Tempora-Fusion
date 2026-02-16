@@ -69,3 +69,29 @@ ZZ commit(const ZZ x, const ZZ r) {
 	return digest_ZZ;
 };
 
+ZZ commit(const ZZ x) {
+	BLAKE3 hash;
+	// using bytes instead of string for safety
+	long n_bytes = NumBytes(x);
+
+	std::vector<unsigned char> x_bytes(n_bytes);
+	BytesFromZZ(x_bytes.data(), x, n_bytes);
+
+	std::string str_from_bytes(x_bytes.begin(), x_bytes.end());
+	// printing "non printable" just to make sure that the string exists 
+	//std::cout << "[COMM] String message check (not printable): " << str_from_bytes << std::endl;
+
+	std::string digest;
+	StringSource(str_from_bytes, true,
+			new HashFilter(hash,
+				new HexEncoder(
+					new StringSink(digest))));
+	//std::cout << "[COMM] Hash check: " << digest << std::endl;
+	//ZZ digest_ZZ(INIT_VAL, digest.c_str(), 16)
+	ZZ digest_ZZ;
+	ZZFromBytes(digest_ZZ, reinterpret_cast<const unsigned char*>(digest.data()), digest.size());
+	//std::cout << "[COMM] ZZ hash check: " << digest_ZZ << std::endl;
+	return digest_ZZ;
+};
+
+

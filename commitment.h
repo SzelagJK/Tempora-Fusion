@@ -19,5 +19,6 @@ using namespace CryptoPP;
 // (hence also the params are zz);
 ZZ commit(const ZZ_p x, const ZZ_p r);
 ZZ commit(const ZZ x, const ZZ r);
+ZZ commit(const ZZ x);
 
 #endif

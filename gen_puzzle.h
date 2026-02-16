@@ -70,6 +70,7 @@ class VHLCTLP_GenPuzzles {
 				std::vector<int> delta, 
 				int max_ss);
 		const GenPuzzlesOutput generate_and_publish();
+		const PRMContainer getPRMs() const;
 };
 
 

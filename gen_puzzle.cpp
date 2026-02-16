@@ -164,11 +164,14 @@ const GenPuzzlesOutput VHLCTLP_GenPuzzles::generate_and_publish() {
 	PRMContainer tmp_PRM;
 	tmp_PRM.SP = SP;
 	tmp_PRM.PP = tmp_PP;
+	PRM = tmp_PRM; // Keep in mind that this is a container of vectors, so reach for a corresponding index for i-th clients prm_u
 
 	std::cout << "[GenPuzzles] Puzzle generation complete" << std::endl;
 
 	return out;
 }
+
+const PRMContainer VHLCTLP_GenPuzzles::getPRMs() const {return PRM;};
 
 // note for later, move all outputs to private variables, set output to void
 
