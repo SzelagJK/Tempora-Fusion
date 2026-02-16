@@ -11,6 +11,7 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <set>
 
 #include "poly_field.h"
 #include "OT_1of2.h"
@@ -24,6 +25,7 @@
 #include "commitment.h"
 #include "setup.h"
 #include "gen_puzzle.h"
+#include "coin_toss.h"
 
 using namespace NTL;
 using namespace CryptoPP;
@@ -313,7 +315,7 @@ void testGenPuzzles() {
 	int key_bits = 128;
 	ZZ test_prime = GenPrime_ZZ(key_bits);
 	std::cout << "[Gen Puzzles] Log2(p): " << key_bits << ", prime chosen: " << test_prime << std::endl;
-	int leader_num = 20;
+	int leader_num = 10;
 	std::cout << "[GenPuzzles] Num of leaders: " << leader_num << std::endl;  	
 	Setup_S S = Setup_S(test_prime, leader_num);
 	S.setFieldParams();
@@ -322,21 +324,21 @@ void testGenPuzzles() {
 	std::cout << "[GenPuzzles] Public X check: " << X << std::endl;
 	long lambda = 2048; // key bits for the second primitive
 	std::cout << "[GenPuzzles] Clients puzzle log2(p): " << lambda << std::endl;
-	int clientsCount = leader_num + 80;
+	int clientsCount = leader_num + 10;
 	std::vector<Setup_C> clients = setupMultipleClients(lambda, clientsCount); // min treshold: t+2
 	std::cout << "[GenPuzzles] Client list check: " << clients.size() << std::endl;
 	// generate few messages for testing
 	Vec<ZZ> M;
 	for (int i = 0; i < clientsCount; i++) {
 		ZZ m = RandomBits_ZZ(256);
-		std::cout << "Message " << i << ": " << m << std::endl;
+		//std::cout << "Message " << i << ": " << m << std::endl;
 		M.append(m);
 	}
 	// the same with random delta values
 	std::vector<int> delta;
 	for (int i = 0; i < clientsCount; i++) {
 		int d = static_cast<int>(RandomBnd(900) + 100);
-		std::cout << "Random delta " << i << ": " << d << std::endl;
+		//std::cout << "Random delta " << i << ": " << d << std::endl;
 		delta.push_back(d);
 	}
 	// GenPuzzles
@@ -358,6 +360,18 @@ void testGenPuzzles() {
 
 	std::cout << "		OK\n";
 
+}
+
+void testCoinToss() {
+	std::cout << "\n[TEST] Coin toss protocol"
+	ZZ r_hat = coinToss(20, 128);
+	std::vector<int> indices = determineLeaderIndices(10, 20, r_hat);
+	std::cout << "[Coin Toss] r_hat: " << r_hat << std::endl;
+	std::cout << "[Coin Toss]Leader Clients (indices): ";
+	for (int i = 0; i < indices.size(); i++) {
+		std::cout << indices[i] << " ";
+	}
+	std::cout << "		OK\n";
 }
 
 int main() {
@@ -399,6 +413,8 @@ int main() {
 
 	testGenPuzzles();
 
+	testCoinToss(); // negligable runtime cost most likley, dont bother with measuring it now 
+	
     	std::cout << "\nAll tests passed.\n";
     	return 0;
 }

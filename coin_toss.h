@@ -3,14 +3,15 @@
 
 #include <NTL/ZZ.h>
 #include <NTL/ZZ_p.h>
+#include <vector>
 #include <set>
 
-#include "commit.h"
+#include "commitment.h"
 #include "prf.h"
 
 // here we willi nclude both coin toss and the deterministic fucntion G
 
 ZZ coinToss(int clientsNum, int outputLen);
-std::set<int> G(int leaderCount, ZZ r_hat);
+std::vector<int> determineLeaderIndices(int leaderCount, int clientCount, ZZ r_hat);
 
 #endif

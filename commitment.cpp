@@ -69,6 +69,7 @@ ZZ commit(const ZZ x, const ZZ r) {
 	return digest_ZZ;
 };
 
+// just a hash of x
 ZZ commit(const ZZ x) {
 	BLAKE3 hash;
 	// using bytes instead of string for safety
