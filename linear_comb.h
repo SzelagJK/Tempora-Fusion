@@ -7,6 +7,7 @@
 #include <vector>
 #include <cassert>
 #include <iostream>
+#include <algorithm>
 
 #include "setup.h"
 #include "gen_puzzle.h"
@@ -28,7 +29,7 @@ using namespace NTL;
 // hence you'll see Evaluate(S, Cv(C_1, ..., C_n), PRMs)
 
 struct S_LinearCombInput {
-	Vec<Vec<ZZ_p>> o_vectos;
+	Vec<Vec<ZZ_p>> o_vectors;
 	const int delta_combination; // for now, assume this is delta time of the combination puzzle
 	const int max_ss;
 	Vec<Vec<ZZ>> PP; // coresspond to PP from GenPuzzlesOutput
@@ -53,19 +54,26 @@ class LinearCombinations {
 		std::vector<C_LinearCombInput> C_vector;
 		PRMContainer PRMs;
 		int t;
+		OLE_enhanced OLE_p;
+
 		int clientsCount;
 		std::vector<int> selected_leaders; // here is where coin_toss comes in
 		Vec<Vec<ZZ>> tK; // temporary secret keys
 		Vec<Vec<ZZ>> F; // random keys f_l meant for each client i, F[leaders][leaders-1]
 		Vec<Vec<ZZ>> tBlindingFactors;  
 		Vec<Vec<ZZ_p>> encryptedRandomRoots;
+		Vec<Vec<ZZ_p>> d_vector_leaders;
+		Vec<Vec<ZZ_p>> d_vector_nonLeaders;
+
+		Vec<Vec<ZZ>> PP_Eval;
+		Vec<ZZ_p> g_vector; // puzzle combination
 	public:
-		LinearCombinations(S_LinearCombInput S, std::vector<C_LinearCombInput> C_vector, PRMContainer PRMs, int t);
+		LinearCombinations(S_LinearCombInput S, std::vector<C_LinearCombInput> C_vector, PRMContainer PRMs, int t, OLE_enhanced OLE_p);
 		void selectLeaders();
 		void grantComputations();
+		void grantComputations_nonLeader();
+		void computeCombination();
+		const Vec<ZZ_p> getG_vector() const;
 };
-
-
-
 
 #endif

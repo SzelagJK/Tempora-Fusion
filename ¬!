@@ -246,5 +246,3 @@ void LinearCombinations::computeCombination() {
 	g_vector = tmp_g_vector;
 };
 
-const Vec<ZZ_p> LinearCombinations::getG_vector() const {return g_vector;};
-
