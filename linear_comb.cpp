@@ -23,6 +23,8 @@ void LinearCombinations::grantComputations() {
 	Vec<Vec<ZZ>> tmp_tBlindingFactors;
 	Vec<Vec<ZZ_p>> tmp_encryptedRandomRoots;
 	Vec<Vec<ZZ>> tmp_BlindingFactors;
+	// t+2 of every v and every y for every client
+	Vec<Vec<Vec<ZZ_p>>> VY;
 	// f_l keys meant for other leaders
 	Vec<Vec<ZZ>> tmp_F;
 	tmp_F.SetLength(t);
@@ -32,6 +34,7 @@ void LinearCombinations::grantComputations() {
 		tmp_F.append(F_u);
 	}
 
+	OLE_enhanced OLE = OLE_enhanced(S.p);
 	for (int i = 0; i < t; i++) {
 		C_LinearCombInput leader_client = C_vector[selected_leaders[i]];
 
@@ -90,17 +93,28 @@ void LinearCombinations::grantComputations() {
 
 		// Generate blinding factors
 		// regenerate previous factors
-		Vec<ZZ> factors;
+		Vec<Vec<ZZ>> factors;
 		for (int j = 0; j < t+2; j++) {
+			Vec<ZZ> zwz;
 			ZZ z = PRF_AES(conv<ZZ_p>(j), PRMs.SP[selected_leaders[i]][0]);
 			ZZ w = PRF_AES(conv<ZZ_p>(j), PRMs.SP[selected_leaders[i]][1]);
-			factors.append(z);
-			factors.append(w);
+			zwz.append(z);
+			zwz.append(w);
 			ZZ z_prime = PRF_AES(conv<ZZ_p>(j), k_prime);
-			factors.append(z_prime); // additional factor
+			zwz.append(z_prime); // additional factor
+			factors.append(zwz);
 		}
 		// set values v and y
-		Vec<ZZ> vy_factors;
+		Vec<Vec<ZZ_p>> vy_factors;
+		// generate fresh keys for every client
+		Vec<ZZ> fresh_keys;
+		for (int j = 0; j < clientsCount; j++) {
+			if (j == i)
+				continue;
+			ZZ f_l;	
+			RandomBits(f_l, poly_lambda);
+			fresh_keys.append(f_l);
+		}
 		for (int j = 0; j < t+2; j++) {
 			// work out v_i_u
 			ZZ_p product_gamma_prime = conv<ZZ_p>(1);
@@ -110,32 +124,50 @@ void LinearCombinations::grantComputations() {
 				product_gamma_prime *= tmp_encryptedRandomRoots[l][j]; // go around all other leaders encrypted roots, grab i-th (or j-th) element
 			}
 			ZZ_p v = gamma_prime_vector[j] * product_gamma_prime;
-			vy_factors.append(rep(v));
+			vy_factors[0].append(v);
 
 			// mod p comes after, if wrong check again
-			ZZ sum_f = conv<ZZ>(0);
-			for (int l = 0; l < clientsCount; l++) {
+			// first sum, goes over every fresh key generated for every client besides themselves, and for each f_l generates i prf outputs and sums them together
+			ZZ_p sum_f = conv<ZZ_p>(0);
+			for (int l = 0; l < fresh_keys.length(); l++) {
 				if (l == i)
 					continue; // skip c_u, although here we dont work with indexes so technically doesn't matter if we set condition to clinttsCount - 1
-				ZZ f_l;
-				RandomBits(f_l, poly_lambda);
 
-				sum_f += PRF_AES(conv<ZZ_p>(l), f_l);
+				sum_f += to_ZZ_p(PRF_AES(conv<ZZ_p>(j), fresh_keys[l]));
 			}
 			// second sum, goes over every f_l recieved by other leader clients, and iterates over them t+2 times generating a PRF value and summing it
 			ZZ_p sum_f_dash = conv<ZZ_p>(0);
-			for (int l = 0; l < t+2; l++) {
-				for (int k = 0; k < t-1; k++) {
-					sum_f_dash += to_ZZ_p(PRF_AES(conv<ZZ_p>(l), tmp_F[i][k]));
-				}
+			for (int l = 0; l < t-1; l++) {
+				sum_f_dash += to_ZZ_p(PRF_AES(conv<ZZ_p>(j), tmp_F[i][l]));
 			}
 
-			ZZ_p y = to_ZZ_p(conv<ZZ>(-1) * sum_f) + sum_f_dash;
+			ZZ_p y = to_ZZ_p(conv<ZZ>(-1) * rep(sum_f)) + sum_f_dash;
 
-			vy_factors.append(rep(y));
+			vy_factors[1].append(y);
+		}
+		VY.append(vy_factors);
+
+		// OLE+ re-encodings
+		Vec<ZZ_p> d_vector;
+		for (int j = 0; j < t+2; j++) {
+			ZZ_p e = leader_client.q * vy_factors[0][j] * inv(to_ZZ_p(factors[1]));
+			ZZ_p e_prime = to_ZZ_p(conv<ZZ>(-1) * leader_client.q * rep(vy_factors[0][j]) * factors[0]) + to_ZZ_p(factors[2]) + vy_factors[1][j];
+			Vec<ZZ> ab = {rep(e), rep(e_prime)};
+			Vec<ZZ> su = {random_ZZ_p(), random_ZZ_p()};
+			ZZ_p d OLE.runOLE_plus(rep(S.o_vectors[i][j]), ab, su);
+			d_vector.append(d);
 		}
 
+		// commit to the root
+		ZZ comm_prime = commit(root, tk);
 
+		Vec<ZZ> pp_eval_u;
+		pp_eval_u.append(h);
+		pp_eval_u.append(comm_prime);
+		pp_eval_u.append(Y);
+		PP_Eval.append(pp_eval_u);
+		
+		
 		
 
 	}

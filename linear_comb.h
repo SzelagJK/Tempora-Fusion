@@ -12,6 +12,7 @@
 #include "gen_puzzle.h"
 #include "coin_toss.h"
 #include "prf.h"
+#include "ole_enhanced.h"
 
 using namespace NTL;
 
@@ -42,6 +43,7 @@ struct C_LinearCombInput {
 	int delta_puzzle;
 	int max_ss;
 	Setup_C K; 
+	int q;
 };
 
 class LinearCombinations {
