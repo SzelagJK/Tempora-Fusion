@@ -2,7 +2,7 @@
 #include "setup.h"
 #include "prf.h"
 
-VHLCTLP_GenPuzzles::VHLCTLP_GenPuzzles(
+VHLCTLP_GenPuzzles::VHLCTLP_GenPuzzles( // add lambda for puzzles keys prf
 		Vec<ZZ> M,  
 		std::vector<Setup_C> K, 
 		ZZ p, 
@@ -60,8 +60,8 @@ void VHLCTLP_GenPuzzles::generateSecretKeys() {
 		PowerMod(mk, r, a, n);
 		key.append(mk);
 		// derive k and s (3b-iii)
-		ZZ k = PRF_AES(conv<ZZ_p>(1), mk); // consider changing the x param datatype to ZZ later  
-		ZZ s = PRF_AES(conv<ZZ_p>(2), mk);
+		ZZ k = PRF_AES(conv<ZZ_p>(1), mk, 2048); // consider changing the x param datatype to ZZ later  
+		ZZ s = PRF_AES(conv<ZZ_p>(2), mk, 2048);
 		key.append(k);
 		sp_u.append(k);
 		key.append(s);
@@ -73,6 +73,7 @@ void VHLCTLP_GenPuzzles::generateSecretKeys() {
 	T = tmp_T;
 	N = tmp_N;
 	R = tmp_R;
+	SP = tmp_SP;
 	secretKeys = keys;
 }
 
@@ -82,7 +83,7 @@ void VHLCTLP_GenPuzzles::generateBlindingFactors() {
 	std::cout << "[GenPuzzles] Generating Blinding Factors" << std::endl;
 	Vec<Vec<ZZ>> tmp_blindingFactors;
 	// we use private secretKeys Vec object
-	for (int i = 0; i < t+2; i++) {
+	for (int i = 1; i <= t+2; i++) {
 		Vec<ZZ> blindingPair;
 		ZZ z = PRF_AES(conv<ZZ_p>(i), secretKeys[i][1]);
 		ZZ w = PRF_AES(conv<ZZ_p>(i), secretKeys[i][2]);

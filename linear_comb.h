@@ -41,10 +41,11 @@ struct S_LinearCombInput {
 struct C_LinearCombInput {
 	int delta_puzzle;
 	int max_ss;
-	std::vector<Setup_C> K; 
+	Setup_C K; 
 };
 
 class LinearCombinations {
+	// Clarificaiton: we use tmp_NAME to define temporary variable *in* a function, and tNAME to define a temporary values specified by the protocol
 	private:
 		S_LinearCombInput S;
 		std::vector<C_LinearCombInput> C_vector;
@@ -53,6 +54,9 @@ class LinearCombinations {
 		int clientsCount;
 		std::vector<int> selected_leaders; // here is where coin_toss comes in
 		Vec<Vec<ZZ>> tK; // temporary secret keys
+		Vec<Vec<ZZ>> F; // random keys f_l meant for each client i, F[leaders][leaders-1]
+		Vec<Vec<ZZ>> tBlindingFactors;  
+		Vec<Vec<ZZ_p>> encryptedRandomRoots;
 	public:
 		LinearCombinations(S_LinearCombInput S, std::vector<C_LinearCombInput> C_vector, PRMContainer PRMs, int t);
 		void selectLeaders();
