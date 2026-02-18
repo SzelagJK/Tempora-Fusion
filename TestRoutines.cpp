@@ -448,7 +448,7 @@ void testLinearComb() {
 	std::cout << "\n[LinearComb] Computing combination" << std::endl;
 	Vec<ZZ_p> combinedPuzzle = LinCombGenerator.compute_and_publish();
 	std::cout << "[LinearComb] G vector check: " << combinedPuzzle.length() << std::endl;
-	std::cout << "[LinearComb] Puzzle g=0: " << combinedPuzzle[0] << std::endl;
+	std::cout << "[LinearComb] Puzzle g: " << combinedPuzzle << std::endl;
 
 }
 
