@@ -43,7 +43,7 @@ void LinearCombinations::grantComputations() {
 		F_u.SetLength(t-1);
 		tmp_F[i] = F_u;
 	}
-	Vec<ZZ> pp_eval_u;
+	PP_Eval.SetLength(3);
 
 	for (int i = 0; i < t; i++) {
 		C_LinearCombInput leader_client = C_vector[selected_leaders[i]];
@@ -59,8 +59,8 @@ void LinearCombinations::grantComputations() {
 			h = RandomBits_ZZ(NumBits(n));
 			h %= n;
 		} while (GCD(h, n) != 1);
-                pp_eval_u.append(h);
-                pp_eval_u.append(Y);
+                PP_Eval[0].append(h);
+                PP_Eval[1].append(Y);
 
 
 		ZZ tk;
@@ -138,7 +138,7 @@ void LinearCombinations::grantComputations() {
 			ZZ_p v = tmp_encryptedRandomRoots[i][j] * product_gamma_prime;
 			vy_factors[0].append(v);
 			// mod p comes after, if wrong check again
-			// first sum, goes over every fresh key generated for every client besides themselves, and for each f_l generates i prf outputs and sums them together
+			// first sum, goes over every fresh key generated for every client besides themselves, and for each f_l generates i prf outputs and sums them together (alternatively add all of the keys together themselves and then run them through a PRF)
 			ZZ_p sum_f = conv<ZZ_p>(0);
 			for (int l = 0; l < tmp_F.length(); l++) {
 				if (l == i)
@@ -178,8 +178,7 @@ void LinearCombinations::grantComputations() {
 		// commit to the root
 		ZZ comm_prime = commit(rep(roots[i]), tmp_tK[i][0]);
 
-		pp_eval_u.append(comm_prime);
-		PP_Eval.append(pp_eval_u);	
+		PP_Eval[2].append(comm_prime);
 	}
 
 	tK = tmp_tK;
@@ -256,6 +255,8 @@ void LinearCombinations::computeCombination() {
 };
 
 const Vec<ZZ_p> LinearCombinations::getG_vector() const {return g_vector;};
+const Vec<Vec<ZZ>> LinearCombinations::get_tK() const {return tK;};
+const Vec<Vec<ZZ>> LinearCombinations::getPP_eval() const {return PP_Eval;};
 
 const Vec<ZZ_p> LinearCombinations::compute_and_publish() {
 	selectLeaders();
