@@ -30,20 +30,20 @@ using namespace NTL;
 
 struct S_LinearCombInput {
 	Vec<Vec<ZZ_p>> o_vectors;
-	const int delta_combination; // for now, assume this is delta time of the combination puzzle
-	const int max_ss;
+	int delta_combination; // for now, assume this is delta time of the combination puzzle
+	int max_ss;
 	Vec<Vec<ZZ>> PP; // coresspond to PP from GenPuzzlesOutput
 	Vec<Vec<ZZ>> PK; // seems redundant, check with Aydin
 	// pk_s
-	const ZZ p;
+	ZZ p;
 	Vec<ZZ_p> X;
-	const int t; // self note: still leaders num
+	int t; // self note: still leaders num
 };
 
 struct C_LinearCombInput {
 	int delta_puzzle;
 	int max_ss;
-	Setup_C K; 
+	std::vector<Setup_C> K; // Kept in a vector to avoid initialisation issues 
 	int q;
 };
 
@@ -55,25 +55,37 @@ class LinearCombinations {
 		PRMContainer PRMs;
 		int t;
 		OLE_enhanced OLE_p;
+		Poly_Field PF;
 
 		int clientsCount;
 		std::vector<int> selected_leaders; // here is where coin_toss comes in
 		Vec<Vec<ZZ>> tK; // temporary secret keys
 		Vec<Vec<ZZ>> F; // random keys f_l meant for each client i, F[leaders][leaders-1]
 		Vec<Vec<ZZ>> tBlindingFactors;  
+		Vec<ZZ_p> roots;
 		Vec<Vec<ZZ_p>> encryptedRandomRoots;
+		Vec<Vec<ZZ>> rFactors; // regenerated factors
 		Vec<Vec<ZZ_p>> d_vector_leaders;
 		Vec<Vec<ZZ_p>> d_vector_nonLeaders;
 
 		Vec<Vec<ZZ>> PP_Eval;
 		Vec<ZZ_p> g_vector; // puzzle combination
-	public:
-		LinearCombinations(S_LinearCombInput S, std::vector<C_LinearCombInput> C_vector, PRMContainer PRMs, int t, OLE_enhanced OLE_p);
+
 		void selectLeaders();
-		void grantComputations();
-		void grantComputations_nonLeader();
+                void grantComputations();
+                void grantComputations_nonLeader();
 		void computeCombination();
+	public:
+		LinearCombinations(
+				S_LinearCombInput S, 
+				std::vector<C_LinearCombInput> C_vector, 
+				PRMContainer PRMs, 
+				int t, 
+				int clientsCount, 
+				OLE_enhanced OLE_p,
+				Poly_Field PF);
 		const Vec<ZZ_p> getG_vector() const;
+		const Vec<ZZ_p> compute_and_publish();
 };
 
 #endif

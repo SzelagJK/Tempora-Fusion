@@ -26,6 +26,7 @@
 #include "setup.h"
 #include "gen_puzzle.h"
 #include "coin_toss.h"
+#include "linear_comb.h"
 
 using namespace NTL;
 using namespace CryptoPP;
@@ -374,6 +375,83 @@ void testCoinToss() {
 	std::cout << "		OK\n";
 }
 
+void testLinearComb() {
+	// Start with setup
+	std::cout << "\n\n [TEST] VHLC-TLP LinearCombination" << std::endl;
+        int key_bits = 128;
+        ZZ test_prime = GenPrime_ZZ(key_bits);
+        int leader_clients = 10;
+	int total_clients = leader_clients + 10;
+
+        std::cout << "[LinearComb]Server Setup Checks" << std::endl;
+        Setup_S S = Setup_S(test_prime, leader_clients);
+        std::cout << "[LinearComb]Leader Qty check: " << S.getLeaderQty() << std::endl;
+        S.setFieldParams(1);
+        S.generatePublicX();
+        std::cout << "[LinearComb] Public X check: " << S.getX().length() << std::endl;
+
+        std::cout << "\n[LinearComb] Client Setup Checks" << std::endl;
+        long lambda = 2048; // key bits for the second primitive
+        Setup_C C = Setup_C(lambda);
+        std::vector<Setup_C> clients = setupMultipleClients(lambda, total_clients); // min treshold: t+2
+        std::cout << "[LinearComb] Client list check: " << clients.size() << std::endl;
+
+	// Generate Puzzles
+	std::cout << "\n[LinearComb] Generating puzzles" << std::endl;
+	Vec<ZZ> M;
+	// random m and delta
+        for (int i = 0; i < total_clients; i++) {
+                ZZ m = RandomBits_ZZ(256);
+                M.append(m);
+        }
+        std::vector<int> delta;
+        for (int i = 0; i < total_clients; i++) {
+                int d = static_cast<int>(RandomBnd(900) + 100);
+                delta.push_back(d);
+        }
+        int max_ss = 1024;
+	std::cout << "X: " << S.getX() << std::endl;
+        VHLCTLP_GenPuzzles PuzzleGenerator(M, clients, test_prime, S.getX(), leader_clients, total_clients, delta, max_ss);
+        GenPuzzlesOutput output = PuzzleGenerator.generate_and_publish();
+        std::cout << "\n[LinearComb] Generator check (size): " << output.o_vectors.length() << std::endl;
+        std::cout << "[LinearComb] Generator check (puzzle u=0): " << output.o_vectors[0] << std::endl;
+
+	std::cout << "\n[LinearComb] Adjusting linear comb inputs" << std::endl;
+	// Adjust input for linear combinations
+	S_LinearCombInput S_input;
+	S_input.o_vectors = output.o_vectors;
+	S_input.delta_combination = 1024;
+	S_input.max_ss = max_ss;
+	S_input.PP = PuzzleGenerator.getPRMs().PP;
+	S_input.p = test_prime;
+	S_input.X = S.getX();
+       	S_input.t = leader_clients;
+	// do the same for all clients
+	std::vector<C_LinearCombInput> C_vector;
+	std::cout << "Size: " << clients.size() << std::endl;
+	for (int i = 0; i < clients.size(); i++) {
+		C_LinearCombInput C_input;
+		C_input.delta_puzzle = delta[i];
+		C_input.max_ss = max_ss;
+		std::vector<Setup_C> K;
+		K.push_back(clients[i]);
+		C_input.K = K;
+		C_input.q = 1; // experimeint purposes
+		C_vector.push_back(C_input);
+	}
+	std::cout << "[LinearComb] Setting up OLE+" << std::endl;
+	OLE_enhanced OLE_p = OLE_enhanced(test_prime);
+	Poly_Field PF = OLE_p.getPF();
+	PRMContainer PRMs_input = PuzzleGenerator.getPRMs();
+	std::cout << "[LinearComb] Generating combination object" << std::endl;
+	LinearCombinations LinCombGenerator = LinearCombinations(S_input, C_vector, PRMs_input, leader_clients, total_clients, OLE_p, PF);
+	std::cout << "\n[LinearComb] Computing combination" << std::endl;
+	Vec<ZZ_p> combinedPuzzle = LinCombGenerator.compute_and_publish();
+	std::cout << "[LinearComb] G vector check: " << combinedPuzzle.length() << std::endl;
+	std::cout << "[LinearComb] Puzzle g=0: " << combinedPuzzle[0] << std::endl;
+
+}
+
 int main() {
     	//std::cout << "Running TLP tests...\n\n";
 
@@ -403,17 +481,19 @@ int main() {
 	std::cout << "OLE+ total execution time: " << test_time.count()/1000 << "ms" << std::endl;
 
 	// More auxilelry (requires p field)
-	testPRF();
+	//testPRF();
 
-	testHash();
+	//testHash();
 
 	// Tests for VHLC-TLP
 	
 	//testSetup();
 
-	testGenPuzzles();
+	//testGenPuzzles();
 
-	testCoinToss(); // negligable runtime cost most likley, dont bother with measuring it now 
+	//testCoinToss(); // negligable runtime cost most likley, dont bother with measuring it now 
+	
+	testLinearComb();
 	
     	std::cout << "\nAll tests passed.\n";
     	return 0;
