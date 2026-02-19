@@ -27,7 +27,8 @@ void LinearCombinations::selectLeaders() {
 
 void LinearCombinations::grantComputations() {
 	std::cout << "[LinearComb] Granting computations (leaders)" << std::endl;
-	// generates temporary secret keys
+
+	// Temporary containers for some class variables for exception safety (commit-or-rollback pattern)  
 	Vec<Vec<ZZ>> tmp_tK;
 	Vec<Vec<ZZ>> tmp_tBlindingFactors;
 	Vec<Vec<ZZ_p>> tmp_encryptedRandomRoots;
@@ -35,7 +36,7 @@ void LinearCombinations::grantComputations() {
 	Vec<Vec<ZZ>> tmp_BlindingFactors;
 	// t+2 of every v and every y for every client
 	Vec<Vec<Vec<ZZ_p>>> VY;
-	// f_l keys meant for other leaders
+	// f_l keys meant for other client (broadcasted strictly by leaders)
 	Vec<Vec<ZZ>> tmp_F;
 	tmp_F.SetLength(clientsCount);
 	for (int i = 0; i < clientsCount; i++) {
@@ -45,8 +46,9 @@ void LinearCombinations::grantComputations() {
 	}
 	PP_Eval.SetLength(3);
 
+	// unit test these loops
 	for (int i = 0; i < t; i++) {
-		C_LinearCombInput leader_client = C_vector[selected_leaders[i]];
+		const C_LinearCombInput& leader_client = C_vector[selected_leaders[i]];
 
 		Vec<ZZ> tK_u;
 		ZZ b;
@@ -122,7 +124,7 @@ void LinearCombinations::grantComputations() {
 
 
 	for (int i = 0; i < t; i++) {
-		C_LinearCombInput leader_client = C_vector[selected_leaders[i]];
+		const C_LinearCombInput& leader_client = C_vector[selected_leaders[i]];
 
 		// set values v and y
 		Vec<Vec<ZZ_p>> vy_factors;
@@ -257,6 +259,7 @@ void LinearCombinations::computeCombination() {
 const Vec<ZZ_p> LinearCombinations::getG_vector() const {return g_vector;};
 const Vec<Vec<ZZ>> LinearCombinations::get_tK() const {return tK;};
 const Vec<Vec<ZZ>> LinearCombinations::getPP_eval() const {return PP_Eval;};
+const std::vector<int> LinearCombinations::get_leaderIndices() const {return selected_leaders;};
 
 const Vec<ZZ_p> LinearCombinations::compute_and_publish() {
 	selectLeaders();

@@ -27,6 +27,7 @@
 #include "gen_puzzle.h"
 #include "coin_toss.h"
 #include "linear_comb.h"
+#include "poly_interpolate.h"
 
 using namespace NTL;
 using namespace CryptoPP;
@@ -449,6 +450,16 @@ void testLinearComb() {
 	Vec<ZZ_p> combinedPuzzle = LinCombGenerator.compute_and_publish();
 	std::cout << "[LinearComb] G vector check: " << combinedPuzzle.length() << std::endl;
 	std::cout << "[LinearComb] Puzzle g: " << combinedPuzzle << std::endl;
+
+
+	Vec<ZZ_p> X_test;
+	Vec<ZZ_p> Y_test;
+	for (int i = 0; i < 5; i++) {
+		X_test.append(ZZ_p(i+1));
+		Y_test.append(ZZ_p(2*i));
+	}
+	ZZ_p eval_inter = interpolate_polynomial(X_test, Y_test);
+	std::cout << "interpolation test: " << eval_inter << std::endl;
 
 }
 

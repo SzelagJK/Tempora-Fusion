@@ -87,6 +87,7 @@ class LinearCombinations {
 		const Vec<ZZ_p> getG_vector() const;
 		const Vec<Vec<ZZ>> get_tK() const;
 		const Vec<Vec<ZZ>> getPP_eval() const;
+		const std::vector<int> get_leaderIndices() const;
 		const Vec<ZZ_p> compute_and_publish();
 };
 
