@@ -122,25 +122,25 @@ void VHLCTLP_GenPuzzles::encodeMessages() {
 
 // VHLCTLP: 3e
 void VHLCTLP_GenPuzzles::encryptMessages() {
-  std::cout << "[GenPuzzles] Encrypting messages" << std::endl;
+  	std::cout << "[GenPuzzles] Encrypting messages" << std::endl;
 
-  Vec<Vec<ZZ_p>> tmp_encryptedMessages;
+  	Vec<Vec<ZZ_p>> tmp_encryptedMessages;
 
-  for (int c = 0; c < encodedMessages.length(); c++) {
-    Vec<ZZ_p> o_vector;
+  	for (int c = 0; c < encodedMessages.length(); c++) {
+    		Vec<ZZ_p> o_vector;
 
-    for (int j = 0; j < encodedMessages[c].length(); j++) {
-      const ZZ& z = blindingFactors[c][j][0];
-      const ZZ& w = blindingFactors[c][j][1];
+    		for (int j = 0; j < encodedMessages[c].length(); j++) {
+      			const ZZ& z = blindingFactors[c][j][0];
+      			const ZZ& w = blindingFactors[c][j][1];
 
-      ZZ_p o = to_ZZ_p(w * (rep(encodedMessages[c][j]) + z));
-      o_vector.append(o);
-    }
+      			ZZ_p o = to_ZZ_p(w * (rep(encodedMessages[c][j]) + z));
+      			o_vector.append(o);
+    		}
 
-    tmp_encryptedMessages.append(o_vector);
-  }
+    		tmp_encryptedMessages.append(o_vector);
+  	}
 
-  encryptedMessages = tmp_encryptedMessages;
+  	encryptedMessages = tmp_encryptedMessages;
 }
 
 // VHLCTLP: 3f

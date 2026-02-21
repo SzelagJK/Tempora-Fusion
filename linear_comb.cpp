@@ -153,7 +153,7 @@ void LinearCombinations::grantComputations() {
 			ZZ_p v_check = conv<ZZ_p>(1);
 			for (int l = 0; l < t; l++) v_check *= tmp_encryptedRandomRoots[l][j];
 			if (v_check != vy_factors[0][j]) {
-    				std::cout << "v mismatch at leaderPos="<<i<<" j="<<j<<"\n";
+    				std::cout << "v mismatch at leaderPos = " << i << " j = " << j << std::endl;
 			}
 
 			// mod p comes after, if wrong check again

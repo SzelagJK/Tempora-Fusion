@@ -467,8 +467,12 @@ void testLinearComb() {
 	std::cout << "interpolation test: " << eval_inter << std::endl;
 
 
-	SolvePuzzle Solver = SolvePuzzle(1, combinedPuzzle, LinCombGenerator.getPP_eval(), PRMs_input.PP, LinCombGenerator.get_roots(), test_prime, S.getX(), leader_clients, LinCombGenerator.get_leaderIndices());
-	Solver.g_solve();
+	SolvePuzzle gSolver = SolvePuzzle(1, combinedPuzzle, LinCombGenerator.getPP_eval(), PRMs_input.PP, LinCombGenerator.get_roots(), test_prime, S.getX(), leader_clients, LinCombGenerator.get_leaderIndices());
+	gSolver.g_solve();
+
+	int targetClient = 0;
+	SolvePuzzle oSolver = SolvePuzzle(0, output.o_vectors[targetClient], targetClient, PRMs_input.PP, LinCombGenerator.get_roots(), test_prime, S.getX(), leader_clients);
+	oSolver.o_solve();
 
 }
 

@@ -1,5 +1,6 @@
 #include "solve_puzzles.h"
 
+// evalPzl
 SolvePuzzle::SolvePuzzle(
 		int cmd, 
 		Vec<ZZ_p> puzzle_vector, 
@@ -22,27 +23,28 @@ SolvePuzzle::SolvePuzzle(
 		assert(cmd != 0);
 	};
 
+// clientPzl
 SolvePuzzle::SolvePuzzle(
 		int cmd, 
 		Vec<ZZ_p> puzzle_vector, 
+		int targetClient,
 		Vec<Vec<ZZ>> PP, 
-		Vec<ZZ> pp_u,
 		Vec<ZZ_p> roots,
 		ZZ p, 
 		Vec<ZZ_p> X, 
-		int t, 
-		std::vector<int> leader_indices) : 
+		int t) : 
 	cmd(std::move(cmd)), 
 	puzzle_vector(std::move(puzzle_vector)), 
+	targetClient(std::move(targetClient)),
 	PP(std::move(PP)),
-	pp_u(std::move(pp_u)),
 	roots(std::move(roots)),
 	p(std::move(p)), 
 	X(std::move(X)), 
-	t(std::move(t)),
-	leader_indices(std::move(leader_indices)) {
+	t(std::move(t)) {
 		assert(cmd == 0);
 	};
+
+// PzlEval
 
 void SolvePuzzle::g_findSecretKeys() {
 	std::cout << "[SolvePuzzle] Finding secret keys" << std::endl;
@@ -59,9 +61,9 @@ void SolvePuzzle::g_findSecretKeys() {
 		h = PP_eval[0][i]; // initially base h, h^(2^Y) to get tk
 		tk = h;
 
-		for (int j = 0; j < Y; j++) {
+		for (int j = 0; j < Y; j++)
 			tk = MulMod(tk, tk, N);
-		}
+
 		tmp_tks.append(tk);
 
 		ZZ k_prime_u = PRF_AES(conv<ZZ_p>(1), tk);
@@ -77,8 +79,8 @@ void SolvePuzzle::g_findSecretKeys() {
 
 void SolvePuzzle::g_removeBlindFactors() {
 	std::cout << "[SolvePuzzle] Removing blind factors" << std::endl;
-	std::cout << "[SolvePuzzle] prime p when solving: " << p << std::endl; 
-	std::cout << "global modulus: " << ZZ_p::modulus() << std::endl;
+	std::cout << "[SolvePuzzle] (Sanity check) Prime p when solving: " << p << std::endl; 
+	std::cout << "[SolvePuzzle] (Sanity check) Global modulus: " << ZZ_p::modulus() << std::endl;
 	Vec<ZZ_p> tmp_theta;
 	for (int i = 0; i < puzzle_vector.length(); i++) {
 		ZZ_p product = conv<ZZ_p>(1);
@@ -103,19 +105,18 @@ void SolvePuzzle::g_extractPolynomial() {
 	// check for correctness
 	for (int u = 0; u < roots.length(); u++) {
    		ZZ_p val = evaluate_and_interpolate(X, theta, roots[u]);
-    		std::cout << "theta(root["<<u<<"]) = " << val << "\n";
+    		std::cout << "[SolvePuzzle] theta(root["<<u<<"]) = " << val << "\n";
 	}
-	std::cout << "theta[0] = " << theta[0] << std::endl;
 
-	// interpolate and evaluate at point 0, extracting the constant of theta(x) as presented on p.24 (Part 5, step c, detailed construction)
-	
 	// debug
 	//ZZ_pX P = interpolate_polynomial(X, theta);
 	//cons = eval(P, ZZ_p(0));
+	//Vec<ZZ_p> extracted_roots = interpolate_roots(X, theta);
+	//std::cout << "extracted roots: " << extracted_roots << std::endl;
+	
+	// interpolate and evaluate at point 0, extracting the constant of theta(x) as presented on p.24 (Part 5, step c, detailed construction)
 	cons = evaluate_and_interpolate(X, theta);
-	Vec<ZZ_p> extracted_roots = interpolate_roots(X, theta);
-	std::cout << "extracted roots: " << extracted_roots << std::endl;
-	std::cout << "cons: " << cons << std::endl;
+	std::cout << "[SolvePuzzle] cons: " << cons << std::endl;
 };
 
 void SolvePuzzle::g_extractLinearCombination() {
@@ -143,7 +144,7 @@ void SolvePuzzle::g_extractValidRoots() {
 	if (tmp_proof[0].length() != roots.length()) {
 		std::cout << "[SolvePuzzle] WARNING: proof vector smaller than roots_u!" << std::endl;
 	}
-	proof = tmp_proof;
+	g_proof = tmp_proof;
 };
 
 void SolvePuzzle::g_publish() {
@@ -160,6 +161,61 @@ void SolvePuzzle::g_solve() {
 	g_publish();
 
 	std::cout << "[SolvePuzzle] PzlEval: " << g_output << std::endl;
+}
+
+// clientPzl
+void SolvePuzzle::o_findSecretKeys() {
+	std::cout << "[SolvePuzzle] Finding secret keys" << std::endl;
+	// grab corrsponding pp_u
+	ZZ T = PP[1][targetClient];
+	ZZ r = PP[2][targetClient];
+	ZZ N = PP[3][targetClient];
+
+	ZZ mk = r;
+	// find mk
+	for (int i = 0; i < T; i++)
+		mk = MulMod(mk, mk, N);
+	K.append(mk);
+
+	ZZ k = PRF_AES(ZZ_p(1), mk);
+	ZZ s = PRF_AES(ZZ_p(2), mk);
+	K.append(k);
+	K.append(s);
+}
+
+void SolvePuzzle::o_removeBlindFactors() {
+	std::cout << "[SolvePuzzle] Removing blinding factors" << std::endl;
+	Vec<Vec<ZZ_p>> clientBlindingFactors;
+	clientBlindingFactors.SetLength(2);
+	for (int i = 0; i < t + 2; i++) {
+		ZZ_p z = to_ZZ_p(PRF_AES(conv<ZZ_p>(i), K[1]));
+		ZZ_p w = to_ZZ_p(PRF_AES(conv<ZZ_p>(i), K[2]));
+		clientBlindingFactors[0].append(z);
+		clientBlindingFactors[1].append(w);
+	}
+	// unblind
+	Vec<ZZ_p> tmp_pi;
+	for (int i = 0; i < t + 2; i++) {
+		ZZ_p pi_i = (inv(clientBlindingFactors[1][i]) * puzzle_vector[i]) - clientBlindingFactors[0][i];
+		tmp_pi.append(pi_i);
+	}
+	pi = tmp_pi;
+}
+
+void SolvePuzzle::o_extract_and_publish() {
+	std::cout << "[SolvePuzzle] Extracting and publishing" << std::endl;
+	std::cout << "len check: " << X.length() << " " << pi.length() << std::endl;
+	ZZ_p m = evaluate_and_interpolate(X, pi); // considers the constant term of pi_u as the plaintext solution
+	o_output = m;
+	o_proof = K[0];
+}
+
+void SolvePuzzle::o_solve() {
+	o_findSecretKeys();
+	o_removeBlindFactors();
+	o_extract_and_publish();
+	
+	std::cout << "[SolvePuzzle] clientPzl: " << o_output << std::endl;
 }
 
 
