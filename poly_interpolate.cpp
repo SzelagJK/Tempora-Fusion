@@ -15,7 +15,7 @@ ZZ_p evaluate_and_interpolate(Vec<ZZ_p> X, Vec<ZZ_p> Y, ZZ_p eval_at) {
 };
 
 
-// experimental, not used in the solution
+// **do not touch anything past this point**
 ZZ_pX interpolate_polynomial(const Vec<ZZ_p>& X, const Vec<ZZ_p>& Y) {
     if (X.length() != Y.length()) {
         LogicError("interpolate_polynomial: X and Y must have same length");
@@ -130,3 +130,4 @@ Vec<ZZ_p> interpolate_roots(const Vec<ZZ_p>& X, const Vec<ZZ_p>& Y) {
 
     return roots;
 }
+

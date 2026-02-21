@@ -103,8 +103,9 @@ void SolvePuzzle::g_extractPolynomial() {
 	std::cout << "[SolvePuzzle] Extracting Polynomial" << std::endl;
 	
 	// check for correctness
-	for (int u = 0; u < roots.length(); u++) {
-   		ZZ_p val = evaluate_and_interpolate(X, theta, roots[u]);
+	Vec<ZZ_p> extracted_roots = interpolate_roots(X, theta);
+	for (int u = 0; u < extracted_roots.length(); u++) {
+   		ZZ_p val = evaluate_and_interpolate(X, theta, extracted_roots[u]);
     		std::cout << "[SolvePuzzle] theta(root["<<u<<"]) = " << val << "\n";
 	}
 
@@ -122,8 +123,6 @@ void SolvePuzzle::g_extractPolynomial() {
 void SolvePuzzle::g_extractLinearCombination() {
 	std::cout << "[SolvePuzzle] Extracting linear combination" << std::endl;
 	ZZ_p product = ZZ_p(1);
-	// debug
-	//Vec<ZZ_p> extracted_roots = interpolate_roots(X, theta);
 	for (int i = 0; i < roots.length(); i++) {
 		product *= -roots[i];	
 	}
@@ -132,18 +131,27 @@ void SolvePuzzle::g_extractLinearCombination() {
 
 void SolvePuzzle::g_extractValidRoots() {
 	std::cout << "[SolvePuzzle] Extracting valid roots" << std::endl;
+	Vec<ZZ_p> tmp_roots;
 	Vec<Vec<ZZ_p>> tmp_proof;
 	tmp_proof.SetLength(2);
-	for (int i = 0; i < roots.length(); i++) {
-		ZZ comm = commit(rep(roots[i]), tK[0][i]);
-		if (comm == PP_eval[2][i]) {
-			tmp_proof[0].append(roots[i]);
-			tmp_proof[1].append(to_ZZ_p(tK[0][i]));
+
+	Vec<ZZ_p> extracted_roots = interpolate_roots(X, theta);	
+	std::cout << "[SolvePuzzle] extracted roots: " << roots << std::endl;
+	for (int i = 0; i < extracted_roots.length(); i++) {
+		for (int j = 0; j < tK[0].length(); j++) {
+			ZZ comm = commit(rep(extracted_roots[i]), tK[0][j]);
+			if (comm == PP_eval[2][j]) {
+				tmp_roots.append(extracted_roots[i]);
+				tmp_proof[0].append(extracted_roots[i]);
+				tmp_proof[1].append(to_ZZ_p(tK[0][j]));
+			}
 		}
 	}
 	if (tmp_proof[0].length() != roots.length()) {
 		std::cout << "[SolvePuzzle] WARNING: proof vector smaller than roots_u!" << std::endl;
 	}
+
+	roots = tmp_roots;
 	g_proof = tmp_proof;
 };
 
@@ -156,16 +164,16 @@ void SolvePuzzle::g_solve() {
 	g_findSecretKeys();
 	g_removeBlindFactors();
 	g_extractPolynomial();
-	g_extractLinearCombination();
 	g_extractValidRoots();
+	g_extractLinearCombination();
 	g_publish();
 
-	std::cout << "[SolvePuzzle] PzlEval: " << g_output << std::endl;
+	std::cout << "\n[SolvePuzzle] PzlEval: " << g_output << std::endl;
 }
 
 // clientPzl
 void SolvePuzzle::o_findSecretKeys() {
-	std::cout << "[SolvePuzzle] Finding secret keys" << std::endl;
+	std::cout << "\n[SolvePuzzle] Finding secret keys" << std::endl;
 	// grab corrsponding pp_u
 	ZZ T = PP[1][targetClient];
 	ZZ r = PP[2][targetClient];
@@ -204,7 +212,6 @@ void SolvePuzzle::o_removeBlindFactors() {
 
 void SolvePuzzle::o_extract_and_publish() {
 	std::cout << "[SolvePuzzle] Extracting and publishing" << std::endl;
-	std::cout << "len check: " << X.length() << " " << pi.length() << std::endl;
 	ZZ_p m = evaluate_and_interpolate(X, pi); // considers the constant term of pi_u as the plaintext solution
 	o_output = m;
 	o_proof = K[0];
@@ -215,7 +222,7 @@ void SolvePuzzle::o_solve() {
 	o_removeBlindFactors();
 	o_extract_and_publish();
 	
-	std::cout << "[SolvePuzzle] clientPzl: " << o_output << std::endl;
+	std::cout << "\n[SolvePuzzle] clientPzl: " << o_output << std::endl;
 }
 
 

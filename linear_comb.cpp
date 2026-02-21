@@ -59,7 +59,8 @@ void LinearCombinations::grantComputations() {
 
 		Vec<ZZ> tK_u;
 		ZZ b;
-		ZZ Y = conv<ZZ>(S.delta_combination) * conv<ZZ>(S.max_ss); // self note: 2^Y < 2^bits(phi(N))
+		ZZ Y = conv<ZZ>(S.delta_combination) * conv<ZZ>(S.max_ss); // self note: keep 2^Y < 2^bits(phi(N))
+		assert(Y < leader_client.K[0].getSecretKey()); 
 		PowerMod(b, conv<ZZ>(2), Y, leader_client.K[0].getSecretKey());
 		
 		ZZ n = leader_client.K[0].getPublicKey();

@@ -415,7 +415,7 @@ void testLinearComb() {
                 int d = static_cast<int>(RandomBnd(9) + 1);
                 delta.push_back(d);
         }
-        int max_ss = 4;
+        int max_ss = 10;
 	std::cout << "X: " << S.getX() << std::endl;
         VHLCTLP_GenPuzzles PuzzleGenerator(M, clients, test_prime, S.getX(), leader_clients, total_clients, delta, max_ss);
         GenPuzzlesOutput output = PuzzleGenerator.generate_and_publish();
@@ -426,7 +426,7 @@ void testLinearComb() {
 	// Adjust input for linear combinations
 	S_LinearCombInput S_input;
 	S_input.o_vectors = output.o_vectors;
-	S_input.delta_combination = 4;
+	S_input.delta_combination = 10;
 	S_input.max_ss = max_ss;
 	S_input.PP = PuzzleGenerator.getPRMs().PP;
 	S_input.p = test_prime;
