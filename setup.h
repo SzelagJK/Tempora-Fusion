@@ -35,11 +35,11 @@ class Setup_S {
 
 class Setup_C {
 	private:
-		ZZ_p sk, pk;
+		ZZ sk, pk;
 	public:
 		Setup_C(long lambda);
-		const ZZ_p& getSecretKey() const; // for testing purposes
-		const ZZ_p& getPublicKey() const;
+		const ZZ& getSecretKey() const; // for testing purposes
+		const ZZ& getPublicKey() const;
 };
 
 std::vector<Setup_C> setupMultipleClients(long lambda, int n);

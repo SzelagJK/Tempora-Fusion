@@ -10,6 +10,8 @@
 #include <cassert>
 
 #include "prf.h"
+#include "poly_interpolate.h"
+#include "commitment.h"
 
 // class used for a single puzzle, not multiple
 class SolvePuzzle {
@@ -18,14 +20,19 @@ class SolvePuzzle {
 		Vec<ZZ_p> puzzle_vector; // ^either o or g 
 		Vec<Vec<ZZ>> PP_eval;
 		Vec<Vec<ZZ>> PP;
+		Vec<ZZ> pp_u;
+		Vec<ZZ_p> roots;
 		// again, pk_s
 		const ZZ p;
 		Vec<ZZ_p> X;
 		const int t;
-
+		std::vector<int> leader_indices;
+		
 		// mutables
 		Vec<Vec<ZZ>> tK; 
 		Vec<ZZ_p> theta;
+		ZZ_p cons;
+		ZZ_p res;
 
 		// combination
 		void g_findSecretKeys();
@@ -33,15 +40,36 @@ class SolvePuzzle {
 		void g_extractPolynomial();
 		void g_extractLinearCombination();
 		void g_extractValidRoots();
-		void g_solve_and_publish();
+		void g_publish();
 		// single client puzzle
 		void o_findSecretKeys();
 		void o_removeBlindFactors();
 		void o_exractPolynomial();
-		void o_solve_and_publish();
+		Vec<Vec<ZZ_p>> o_solve_and_publish();
 	public: 
-		SolvePuzzle(int cmd, Vec<ZZ_p> puzzle_vector, Vec<Vec<ZZ>> PP_eval, ZZ p, Vec<ZZ_p> X, int t); // combination
-		SolvePuzzle(int cmd, Vec<ZZ_p> puzzle_vector, Vec<ZZ> pp_u, ZZ p, Vec<ZZ_p> X, int t); // single
+		ZZ_p g_output;
+		Vec<Vec<ZZ_p>> proof;
+		SolvePuzzle(
+			int cmd, 
+			Vec<ZZ_p> puzzle_vector, 
+			Vec<Vec<ZZ>> PP_eval, 
+			Vec<Vec<ZZ>> PP,
+			Vec<ZZ_p> roots,
+			ZZ p, 
+			Vec<ZZ_p> X, 
+			int t, 
+			std::vector<int> leader_indices); // combination
+		SolvePuzzle(
+			int cmd, 
+			Vec<ZZ_p> puzzle_vector, 
+			Vec<Vec<ZZ>> PP, 
+			Vec<ZZ> pp_u, 
+			Vec<ZZ_p> roots,
+			ZZ p, 
+			Vec<ZZ_p> X, 
+			int t, 
+			std::vector<int> leader_indices); // single
+		void g_solve();
 };
 
 #endif

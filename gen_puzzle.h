@@ -46,7 +46,7 @@ class VHLCTLP_GenPuzzles {
 		Vec<ZZ> T; // All delta_u * max_ss
 		Vec<ZZ> N; // Clients puzzle public keys
 		Vec<ZZ> R; // All r_u bases
-		Vec<Vec<ZZ>> blindingFactors;
+		Vec<Vec<Vec<ZZ>>> blindingFactors;
 		Vec<Vec<ZZ_p>> encodedMessages;
 		Vec<Vec<ZZ_p>> encryptedMessages; // corresponds to "puzzles"
 		Vec<ZZ> messageCommitments;

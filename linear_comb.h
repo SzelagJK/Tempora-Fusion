@@ -64,7 +64,7 @@ class LinearCombinations {
 		Vec<Vec<ZZ>> tBlindingFactors;  
 		Vec<ZZ_p> roots;
 		Vec<Vec<ZZ_p>> encryptedRandomRoots;
-		Vec<Vec<ZZ>> rFactors; // regenerated factors
+		Vec<Vec<ZZ_p>> Y_all;
 		Vec<Vec<ZZ_p>> d_vector_leaders;
 		Vec<Vec<ZZ_p>> d_vector_nonLeaders;
 
@@ -88,6 +88,7 @@ class LinearCombinations {
 		const Vec<Vec<ZZ>> get_tK() const;
 		const Vec<Vec<ZZ>> getPP_eval() const;
 		const std::vector<int> get_leaderIndices() const;
+		const Vec<ZZ_p> get_roots() const;
 		const Vec<ZZ_p> compute_and_publish();
 };
 

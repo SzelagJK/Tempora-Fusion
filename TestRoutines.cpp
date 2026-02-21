@@ -28,6 +28,7 @@
 #include "coin_toss.h"
 #include "linear_comb.h"
 #include "poly_interpolate.h"
+#include "solve_puzzles.h"
 
 using namespace NTL;
 using namespace CryptoPP;
@@ -381,8 +382,8 @@ void testLinearComb() {
 	std::cout << "\n\n [TEST] VHLC-TLP LinearCombination" << std::endl;
         int key_bits = 128;
         ZZ test_prime = GenPrime_ZZ(key_bits);
-        int leader_clients = 10;
-	int total_clients = leader_clients + 10;
+        int leader_clients = 4;
+	int total_clients = leader_clients + 6;
 
         std::cout << "[LinearComb]Server Setup Checks" << std::endl;
         Setup_S S = Setup_S(test_prime, leader_clients);
@@ -400,17 +401,21 @@ void testLinearComb() {
 	// Generate Puzzles
 	std::cout << "\n[LinearComb] Generating puzzles" << std::endl;
 	Vec<ZZ> M;
+	ZZ_p sum = ZZ_p(0);
 	// random m and delta
         for (int i = 0; i < total_clients; i++) {
-                ZZ m = RandomBits_ZZ(256);
+                ZZ m = RandomBits_ZZ(32);
                 M.append(m);
+		std::cout << "m: " << m << std::endl;
+		sum += to_ZZ_p(m);
         }
+	std::cout << "True sum: " << sum << std::endl;
         std::vector<int> delta;
         for (int i = 0; i < total_clients; i++) {
-                int d = static_cast<int>(RandomBnd(900) + 100);
+                int d = static_cast<int>(RandomBnd(9) + 1);
                 delta.push_back(d);
         }
-        int max_ss = 1024;
+        int max_ss = 4;
 	std::cout << "X: " << S.getX() << std::endl;
         VHLCTLP_GenPuzzles PuzzleGenerator(M, clients, test_prime, S.getX(), leader_clients, total_clients, delta, max_ss);
         GenPuzzlesOutput output = PuzzleGenerator.generate_and_publish();
@@ -421,7 +426,7 @@ void testLinearComb() {
 	// Adjust input for linear combinations
 	S_LinearCombInput S_input;
 	S_input.o_vectors = output.o_vectors;
-	S_input.delta_combination = 1024;
+	S_input.delta_combination = 4;
 	S_input.max_ss = max_ss;
 	S_input.PP = PuzzleGenerator.getPRMs().PP;
 	S_input.p = test_prime;
@@ -458,8 +463,12 @@ void testLinearComb() {
 		X_test.append(ZZ_p(i+1));
 		Y_test.append(ZZ_p(2*i));
 	}
-	ZZ_p eval_inter = interpolate_polynomial(X_test, Y_test);
+	ZZ_p eval_inter = evaluate_and_interpolate(X_test, Y_test);
 	std::cout << "interpolation test: " << eval_inter << std::endl;
+
+
+	SolvePuzzle Solver = SolvePuzzle(1, combinedPuzzle, LinCombGenerator.getPP_eval(), PRMs_input.PP, LinCombGenerator.get_roots(), test_prime, S.getX(), leader_clients, LinCombGenerator.get_leaderIndices());
+	Solver.g_solve();
 
 }
 

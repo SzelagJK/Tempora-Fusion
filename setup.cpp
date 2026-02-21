@@ -35,11 +35,12 @@ const void Setup_S::generatePublicX() {
 Setup_C::Setup_C(long lambda) {
 	assert(lambda >= 2048); // Ensure security parameters is large enough, in accordance with the paper
 	RSAParams params = setupRSA(lambda);
-	sk = to_ZZ_p(params.getPhi());
-	pk = to_ZZ_p(params.getN());
+	// reduced to S.p, improve later
+	sk = params.getPhi();
+	pk = params.getN();
 };
-const ZZ_p& Setup_C::getSecretKey() const {return sk;};
-const ZZ_p& Setup_C::getPublicKey() const {return pk;};
+const ZZ& Setup_C::getSecretKey() const {return sk;};
+const ZZ& Setup_C::getPublicKey() const {return pk;};
 
 // when defining n, generate at least t+2 clients, otherwise the number of clients will be smaller than required (refer to the paper) 
 std::vector<Setup_C> setupMultipleClients(long lambda, int n) {
