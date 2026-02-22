@@ -12,6 +12,7 @@
 #include <sstream>
 #include <iomanip>
 #include <set>
+#include <cstdlib>
 
 #include "poly_field.h"
 #include "OT_1of2.h"
@@ -171,21 +172,71 @@ void testOPEInterface() {
 }
 
 void testOT() {
-	std::cout << "[TEST] Oblivious Transfer (1-out-of-2)\n";
-	ZZ_p rm0 = random_ZZ_p();
-	ZZ_p rm1 = random_ZZ_p();
-	bigint result;
-	mpz_init(result);
-	bigint* result_ptr = OT_1of2(rm0, rm1, 1, 512);
-	mpz_set(result, *result_ptr);
-	char* s = mpz_get_str(NULL, 10, result);
-	std::cout << "OT result: " << s << std::endl;
+        std::cout << "\n\n[TEST] Oblivious Transfer (1-out-of-2)\n";
 
-	std::cout << "	OK\n";
+        // Ensure zero is initialized (OT helpers)
+        mpz_init_set_ui(zero, 0);
+
+        const int iterations = 1000;
+        const int key_bits = 512;
+        const int choice = 1;
+
+        using clock = std::chrono::high_resolution_clock;
+
+        mpz_t result;
+        mpz_init(result);
+
+        bool all_correct = true;
+
+        auto start = clock::now();
+
+        for (int i = 0; i < iterations; i++) {
+
+                ZZ_p rm0 = random_ZZ_p();
+                ZZ_p rm1 = random_ZZ_p();
+
+                bigint* result_ptr = OT_1of2(rm0, rm1, choice, key_bits);
+
+                mpz_set(result, *result_ptr);
+
+                // Lift expected value to mpz for comparison
+                mpz_t expected;
+                mpz_init(expected);
+                ZZp_to_mpz(expected, (choice == 0 ? rm0 : rm1));
+
+                if (mpz_cmp(result, expected) != 0) {
+                        all_correct = false;
+                }
+
+                mpz_clear(expected);
+
+                // Self note:
+                // OT_1of2 internally allocates matrices and arrays without providing cleanup
+        }
+
+        auto end = clock::now();
+
+        std::chrono::duration<double, std::micro> test_time = end - start;
+        double average_time = test_time.count() / iterations;
+
+        std::cout << "OT_1of2 average execution time: \033[1;38;5;208m"
+                  << average_time / 1000 << "ms\033[0m" << std::endl;
+
+        std::cout << "OT_1of2 total execution time: \033[1;38;5;208m"
+                  << test_time.count() / 1000 << "ms\033[0m" << std::endl;
+
+        if (all_correct)
+                std::cout << "        PASS: All 1000 OT executions correct\n";
+        else
+                std::cout << "        FAIL: At least one OT execution incorrect\n";
+
+        mpz_clear(result);
+
+        std::cout << "        OK\n";
 }
 
 void testOLE() {
-       	std::cout << "\n\n\n [TEST] OLE main test\n" << std::endl;
+       	std::cout << "\n\n[TEST] OLE main test\n" << std::endl;
        	int key_bits = 512; 
 	ZZ test_prime = GenPrime_ZZ(key_bits);
 	Poly_Field PF = Poly_Field(test_prime, 1);
@@ -200,7 +251,7 @@ void testOLE() {
 }
 
 void testOLE_enhanced() {
-	std::cout << "\n\n\n [TEST] OLE+ main test\n" << std::endl;
+	std::cout << "\n\n[TEST] OLE+ main test\n" << std::endl;
 	int key_bits = 128;
 	ZZ test_prime = GenPrime_ZZ(key_bits);
 	OLE_enhanced OLE_p(test_prime);
@@ -211,35 +262,29 @@ void testOLE_enhanced() {
 	ZZ u = RandomLen_ZZ(key_bits);
 	Vec<ZZ> secrets = init_secrets_vector(s, u);
 	std::cout << "Testing OLE+ on input: " << testInput << std::endl;
-	ZZ_p result = OLE_p.runOLE_plus(testInput, coeffs_ab, secrets);
+	// unit testing
+	using clock = std::chrono::high_resolution_clock;
+        ZZ_p result;
+        int iterations = 100;   // change as needed
+        auto start = clock::now();
+        for (int i = 0; i < iterations; i++) {
+                OLE_p.runOLE_plus(testInput, coeffs_ab, secrets);
+        }
+        auto end = clock::now();
+        std::chrono::duration<double, std::micro> test_time = end - start;
+        double average_time = test_time.count() / iterations;
+
+        std::cout << "OLE+ average execution time: \033[1;38;5;208m"
+                  << average_time / 1000 << "ms\033[0m" << std::endl;
+        std::cout << "OLE+ total execution time: \033[1;38;5;208m"
+                  << test_time.count() / 1000 << "ms\033[0m" << std::endl;	
+
 	std::cout << "Correct evaluation: " << (coeffs_ab[0] + coeffs_ab[1]*testInput) << std::endl;
 	std::cout << "Computed evaluation: " << result << std::endl;
 }
 
-void testSetup() {
-	std::cout << "\n\n [TEST] VHLC-TLP Setup" << std::endl;
-	int key_bits = 128;
-	ZZ test_prime = GenPrime_ZZ(key_bits);
-	int leader_clients = 10;
-	
-	std::cout << "Server Setup Checks" << std::endl;
-	Setup_S S = Setup_S(test_prime, leader_clients);
-	std::cout << "Leader Qty check: " << S.getLeaderQty() << std::endl;
-	S.setFieldParams(1);
-	S.generatePublicX();
-	std::cout << "Public X check: " << S.getX().length() << std::endl;
-
-	std::cout << "Client Setup Checks" << std::endl;
-	long lambda = 2048; // key bits for the second primitive
-	Setup_C C = Setup_C(lambda);
-	std::cout << "Client public key (N): " << C.getPublicKey() << std::endl;
-	std::cout << "Client secret key (Phi(N)): " << C.getSecretKey() << std::endl;
-	std::vector<Setup_C> clients = setupMultipleClients(lambda, leader_clients + 2); // min treshold: t+2
-	std::cout << "Client list check: " << clients.size() << std::endl;
-}
-
 void testPRF() {
-	std::cout << "\n\n [TEST] testing PRF" << std::endl;
+	std::cout << "\n\n[TEST] testing PRF" << std::endl;
 	int key_bits = 128;
 
 	int testIterations = 1000;
@@ -276,8 +321,8 @@ void testPRF() {
 
 	std::chrono::duration<double, std::micro> test_time = end - start;
 	double average_time = test_time.count()/testIterations;
-	std::cout << "[PRF] average execution time: " << (average_time/1000)/4 << "ms" << std::endl;
-	std::cout << "[PRF] total execution time: " << test_time.count()/1000 << "ms" << std::endl;
+	std::cout << "[PRF] average execution time: \033[1;38;5;208m" << (average_time/1000)/4 << "ms\033[0m" << std::endl;
+	std::cout << "[PRF] total execution time: \033[1;38;5;208m" << test_time.count()/1000 << "ms\033[0m" << std::endl;
 
 	std::cout << "[PRF] PASS Count: " << pass << std::endl;
 	std::cout << "[PRF] FAIL Count: " << fail << std::endl;
@@ -293,8 +338,8 @@ void testPRF() {
 	auto end2 = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double, std::micro> prf_time = end2 - start2;
 	double prf_avg = prf_time.count()/single_prf_iter;
-	std::cout << "\n[PRF] Avg. single PRF execution time: " << prf_avg/1000 << "ms" << std::endl; 
-	std::cout << "[PRF] Total execution time: " << prf_time.count()/1000 << "ms" << std::endl;
+	std::cout << "\n[PRF] Avg. single PRF execution time: \033[1;38;5;208m" << prf_avg/1000 << "ms\033[0m" << std::endl; 
+	std::cout << "[PRF] Total execution time: \033[1;38;5;208m" << prf_time.count()/1000 << "ms\033[0m" << std::endl;
 }
 
 void testHash() {
@@ -308,62 +353,8 @@ void testHash() {
 	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double, std::micro> time = end - start;
 	double avg_time = time.count()/iterations;
-	std::cout << "\n[COMM] Avg. signle commitment execution time: " << avg_time/1000 << "ms" << std::endl;
-	std::cout << "[COMM] Total execution time: " << time.count()/1000 << "ms" << std::endl;
-}
-
-void testGenPuzzles() {
-	std::cout << "\n\n[TEST] VHLC-TLP Geneate Puzzles" << std::endl;
-	// Setup
-	std::cout << "[GenPuzzles] Setting up server and client params" << std::endl;
-	int key_bits = 128;
-	ZZ test_prime = GenPrime_ZZ(key_bits);
-	std::cout << "[Gen Puzzles] Log2(p): " << key_bits << ", prime chosen: " << test_prime << std::endl;
-	int leader_num = 10;
-	std::cout << "[GenPuzzles] Num of leaders: " << leader_num << std::endl;  	
-	Setup_S S = Setup_S(test_prime, leader_num);
-	S.setFieldParams();
-	S.generatePublicX();
-	Vec<ZZ_p> X = S.getX();
-	std::cout << "[GenPuzzles] Public X check: " << X << std::endl;
-	long lambda = 2048; // key bits for the second primitive
-	std::cout << "[GenPuzzles] Clients puzzle log2(p): " << lambda << std::endl;
-	int clientsCount = leader_num + 10;
-	std::vector<Setup_C> clients = setupMultipleClients(lambda, clientsCount); // min treshold: t+2
-	std::cout << "[GenPuzzles] Client list check: " << clients.size() << std::endl;
-	// generate few messages for testing
-	Vec<ZZ> M;
-	for (int i = 0; i < clientsCount; i++) {
-		ZZ m = RandomBits_ZZ(256);
-		//std::cout << "Message " << i << ": " << m << std::endl;
-		M.append(m);
-	}
-	// the same with random delta values
-	std::vector<int> delta;
-	for (int i = 0; i < clientsCount; i++) {
-		int d = static_cast<int>(RandomBnd(900) + 100);
-		//std::cout << "Random delta " << i << ": " << d << std::endl;
-		delta.push_back(d);
-	}
-	// GenPuzzles
-	int max_ss = 1024;
-	auto start = std::chrono::high_resolution_clock::now();
-	VHLCTLP_GenPuzzles PuzzleGenerator(M, clients, test_prime, X, leader_num, clientsCount, delta, max_ss);
-	auto end_puzzleObjectSetup = std::chrono::high_resolution_clock::now();
-	GenPuzzlesOutput output = PuzzleGenerator.generate_and_publish();
-	auto end_puzzleGeneration = std::chrono::high_resolution_clock::now();
-	std::cout << "\n[GenPuzzles] Generator check (size): " << output.o_vectors.length() << std::endl;
-	std::cout << "[GenPuzzles] Generator check (puzzle u=0): " << output.o_vectors[0] << std::endl;
-
-	std::chrono::duration<double, std::micro> time_objectSetup = end_puzzleObjectSetup - start;
-	std::chrono::duration<double, std::micro> time_puzzleGeneration = end_puzzleGeneration - end_puzzleObjectSetup;
-	double singleClientTime = time_puzzleGeneration.count()/clientsCount;
-	std::cout << "\n[GenPuzzles] Puzzle object setup time: " << time_objectSetup.count()/1000 << "ms" << std::endl; 
-	std::cout << "[GenPuzzles] Average puzzle generation time: " << singleClientTime/1000 <<  "ms" << std::endl;
-	std::cout << "[GenPuzzles] Total puzzle generation time: " << time_puzzleGeneration.count()/1000 << "ms" << std::endl;
-
-	std::cout << "		OK\n";
-
+	std::cout << "\n[COMM] Avg. signle commitment execution time: \033[1;38;5;208m" << avg_time/1000 << "ms\033[0m" << std::endl;
+	std::cout << "[COMM] Total execution time: \033[1;38;5;208m" << time.count()/1000 << "ms\033[0m" << std::endl;
 }
 
 void testCoinToss() {
@@ -378,27 +369,29 @@ void testCoinToss() {
 	std::cout << "		OK\n";
 }
 
-void testLinearComb() {
+void testVHLCTLP(int client_count, int leader_count) {
+	assert(client_count > leader_count + 1);
+
 	// Start with setup
-	std::cout << "\n\n [TEST] VHLC-TLP LinearCombination" << std::endl;
+	std::cout << "\n\n[TEST] VHLC-TLP main test" << std::endl;
         int key_bits = 128;
         ZZ test_prime = GenPrime_ZZ(key_bits);
-        int leader_clients = 20;
-	int total_clients = leader_clients + 80;
+        int leader_clients = leader_count;
+	int total_clients = client_count;
 
-        std::cout << "\n[LinearComb] Server Setup" << std::endl;
+        std::cout << "\n[VHLCTLP] Server setup" << std::endl;
         Setup_S S = Setup_S(test_prime, leader_clients);
-        std::cout << "[LinearComb] Leader Qty check: " << S.getLeaderQty() << std::endl;
+        std::cout << "[VHLCTLP] Leader quantity check: " << S.getLeaderQty() << std::endl;
         S.setFieldParams(1);
         S.generatePublicX();
 
-        std::cout << "\n[LinearComb] Client Setup Checks" << std::endl;
+        std::cout << "\n[VHLCTLP] Client setup checks" << std::endl;
         long lambda = 2048; // key bits for the second primitive
         Setup_C C = Setup_C(lambda);
         std::vector<Setup_C> clients = setupMultipleClients(lambda, total_clients); // min treshold: t+2
 
 	// Generate Puzzles
-	std::cout << "\n[LinearComb] Generating puzzles" << std::endl;
+	std::cout << "\n[VHLCTLP] Generating puzzles" << std::endl;
 	Vec<ZZ> M;
 	ZZ_p sum = ZZ_p(0);
 	// random m and delta
@@ -418,7 +411,7 @@ void testLinearComb() {
         VHLCTLP_GenPuzzles PuzzleGenerator(M, clients, test_prime, S.getX(), leader_clients, total_clients, delta, max_ss);
         GenPuzzlesOutput output = PuzzleGenerator.generate_and_publish();
 
-	std::cout << "\n[LinearComb] Adjusting linear comb inputs" << std::endl;
+	std::cout << "\n[VHLCTLP] Adjusting linear comb inputs" << std::endl;
 	// Adjust input for linear combinations
 	S_LinearCombInput S_input;
 	S_input.o_vectors = output.o_vectors;
@@ -440,15 +433,15 @@ void testLinearComb() {
 		C_input.q = 1; // experimeint purposes
 		C_vector.push_back(C_input);
 	}
-	std::cout << "[LinearComb] Setting up OLE+" << std::endl;
+	std::cout << "[VHLCTLP] Setting up OLE+" << std::endl;
 	OLE_enhanced OLE_p = OLE_enhanced(test_prime);
 	Poly_Field PF = OLE_p.getPF();
 	PRMContainer PRMs_input = PuzzleGenerator.getPRMs();
-	std::cout << "[LinearComb] Generating combination object" << std::endl;
+	std::cout << "[VHLCTLP] Generating combination object" << std::endl;
 	LinearCombinations LinCombGenerator = LinearCombinations(S_input, C_vector, PRMs_input, leader_clients, total_clients, OLE_p, PF);
-	std::cout << "\n[LinearComb] Computing combination" << std::endl;
+	std::cout << "\n[VHLCTLP] Computing combination" << std::endl;
 	Vec<ZZ_p> combinedPuzzle = LinCombGenerator.compute_and_publish();
-	std::cout << "[LinearComb] Puzzle g: " << combinedPuzzle << std::endl;
+	std::cout << "[VHLCTLP] Puzzle g: " << combinedPuzzle << std::endl;
 
 
 	Vec<ZZ_p> X_test;
@@ -475,51 +468,29 @@ void testLinearComb() {
 }
 
 int main() {
-    	//std::cout << "Running TLP tests...\n\n";
-
-    	//testRSASetup();
-    	//testTrapdoorVsSequential();
-   	//testSequentialTimingStatistical();
-    	//testEndToEndPuzzle();
+    	std::cout << "Running Tests\n\n";
 
     	// Auxillery tests
-    	//testPolynomialGeneration();
-    	//testOT();
-    	//testOPEInterface();
+    	testPolynomialGeneration();	
+    	testOT();
 
     	// Main test for OLE
 	// testOLE();
 
 	// Main test for OLE+
-	auto start = std::chrono::high_resolution_clock::now();
-	int iterations = 1;
-	for (int i = 0; i < iterations; i++)
-		testOLE_enhanced();
-	auto end = std::chrono::high_resolution_clock::now();	
-
-	std::chrono::duration<double, std::micro> test_time = end - start;
-	double average_time = test_time.count()/iterations;
-	std::cout << "OLE+ average execution time: " << average_time/1000 << "ms" << std::endl;
-	std::cout << "OLE+ total execution time: " << test_time.count()/1000 << "ms" << std::endl;
+	testOLE_enhanced();
 
 	// More auxilelry (requires p field)
-	//testPRF();
+	testPRF();
 
-	//testHash();
+	testHash();
 
 	// Tests for VHLC-TLP
-	
-	//testSetup();
-
-	//testGenPuzzles();
 
 	//testCoinToss(); // negligable runtime cost most likley, dont bother with measuring it now 
 	
-	testLinearComb();
+	testVHLCTLP(20, 10); // Client count, Leader count
 	
     	std::cout << "\nAll tests passed.\n";
     	return 0;
 }
-// Notes for the next time: 
-// Move onto the paper and proceed with linear combinations + interactions (see what fits best at this point in the implementation)
-// This will become a library remember to generalise interfaces to any degree polynomial, and add some more overloading

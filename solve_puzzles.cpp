@@ -139,14 +139,80 @@ void SolvePuzzle::g_publish() {
 }
 
 void SolvePuzzle::g_solve() {
-	g_findSecretKeys();
-	g_removeBlindFactors();
-	g_extractPolynomial();
-	g_extractValidRoots();
-	g_extractLinearCombination();
-	g_publish();
+        using clock = std::chrono::high_resolution_clock;
 
-	std::cout << "\n[SolvePuzzle] \033[1;36mPzlEval: \033[0m" << g_output << std::endl;
+        struct TimingRecord {
+                std::string name;
+                std::chrono::duration<double, std::micro> total_time_us{0};
+        };
+
+        TimingRecord t_total{"g_solve (total)", {}};
+
+        TimingRecord t_findSecretKeys{"g_findSecretKeys", {}};
+        TimingRecord t_removeBlindFactors{"g_removeBlindFactors", {}};
+        TimingRecord t_extractPolynomial{"g_extractPolynomial", {}};
+        TimingRecord t_extractValidRoots{"g_extractValidRoots", {}};
+        TimingRecord t_extractLinearCombination{"g_extractLinearCombination", {}};
+        // g_publish intentionally not timed
+
+        auto total_start = clock::now();
+
+        {
+                auto start = clock::now();
+                g_findSecretKeys();
+                auto end = clock::now();
+                t_findSecretKeys.total_time_us = end - start;
+        }
+
+        {
+                auto start = clock::now();
+                g_removeBlindFactors();
+                auto end = clock::now();
+                t_removeBlindFactors.total_time_us = end - start;
+        }
+
+        {
+                auto start = clock::now();
+                g_extractPolynomial();
+                auto end = clock::now();
+                t_extractPolynomial.total_time_us = end - start;
+        }
+
+        {
+                auto start = clock::now();
+                g_extractValidRoots();
+                auto end = clock::now();
+                t_extractValidRoots.total_time_us = end - start;
+        }
+
+        {
+                auto start = clock::now();
+                g_extractLinearCombination();
+                auto end = clock::now();
+                t_extractLinearCombination.total_time_us = end - start;
+        }
+
+        // Not timed individually
+        g_publish();
+
+        auto total_end = clock::now();
+        t_total.total_time_us = total_end - total_start;
+
+        auto print_total = [](const TimingRecord& rec) {
+                std::chrono::duration<double, std::micro> test_time = rec.total_time_us;
+                std::cout << rec.name << " total execution time: \033[1;38;5;208m"
+                          << test_time.count() / 1000 << "ms\033[0m" << std::endl;
+        };
+
+        print_total(t_findSecretKeys);
+        print_total(t_removeBlindFactors);
+        print_total(t_extractPolynomial);
+        print_total(t_extractValidRoots);
+        print_total(t_extractLinearCombination);
+
+        print_total(t_total);
+
+        std::cout << "\n[SolvePuzzle] \033[1;36mPzlEval: \033[0m" << g_output << std::endl;
 }
 
 // clientPzl
@@ -195,11 +261,54 @@ void SolvePuzzle::o_extract_and_publish() {
 }
 
 void SolvePuzzle::o_solve() {
-	o_findSecretKeys();
-	o_removeBlindFactors();
-	o_extract_and_publish();
-	
-	std::cout << "\n[SolvePuzzle] \033[1;36mclientPzl: \033[0m" << o_output << std::endl;
+        using clock = std::chrono::high_resolution_clock;
+
+        struct TimingRecord {
+                std::string name;
+                std::chrono::duration<double, std::micro> total_time_us{0};
+        };
+
+        TimingRecord t_total{"o_solve (total)", {}};
+
+        TimingRecord t_findSecretKeys{"o_findSecretKeys", {}};
+        TimingRecord t_removeBlindFactors{"o_removeBlindFactors", {}};
+        // o_extract_and_publish intentionally not timed
+
+        auto total_start = clock::now();
+
+        {
+                auto start = clock::now();
+                o_findSecretKeys();
+                auto end = clock::now();
+                t_findSecretKeys.total_time_us = end - start;
+        }
+
+        {
+                auto start = clock::now();
+                o_removeBlindFactors();
+                auto end = clock::now();
+                t_removeBlindFactors.total_time_us = end - start;
+        }
+
+        // Not timed individually
+        o_extract_and_publish();
+
+        auto total_end = clock::now();
+        t_total.total_time_us = total_end - total_start;
+
+        auto print_total = [](const TimingRecord& rec) {
+                std::chrono::duration<double, std::micro> test_time = rec.total_time_us;
+                std::cout << rec.name << " total execution time: \033[1;38;5;208m"
+                          << test_time.count() / 1000 << "ms\033[0m" << std::endl;
+        };
+
+	std::cout << "\n" << std::endl;
+        print_total(t_findSecretKeys);
+        print_total(t_removeBlindFactors);
+        print_total(t_total);
+	std::cout << "\n" << std::endl;
+
+        std::cout << "\n[SolvePuzzle] \033[1;36mclientPzl: \033[0m" << o_output << std::endl;
 }
 
 

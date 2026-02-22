@@ -306,12 +306,79 @@ const std::vector<int> LinearCombinations::get_leaderIndices() const {return sel
 const Vec<ZZ_p> LinearCombinations::get_roots() const {return roots;};
 
 const Vec<ZZ_p> LinearCombinations::compute_and_publish() {
-	//perform unit tests here most likely
-	selectLeaders();
-	grantComputations();
-	grantComputations_nonLeader();
-	computeCombination();
-	return getG_vector();
-};
+	// unit testing as we go
+    	using clock = std::chrono::high_resolution_clock;
+
+    	struct TimingRecord {
+        	std::string name;
+        	std::chrono::duration<double, std::micro> total_time_us{0};
+        	bool compute_average = false;
+        	double iterations = 1.0; // divisor for average
+    	};
+
+    	TimingRecord t_selectLeaders{"selectLeaders", {}, false, 1.0};
+    	TimingRecord t_grantLeader{"grantComputations", {}, true, 1.0};
+    	TimingRecord t_grantNonLeader{"grantComputations_nonLeader", {}, true, 1.0};
+    	TimingRecord t_computeCombination{"computeCombination", {}, false, 1.0};
+
+	// unit test each time, take time
+
+	{
+        	auto start = clock::now();
+        	selectLeaders();
+        	auto end = clock::now();
+        	t_selectLeaders.total_time_us = end - start;
+    	}
+
+
+    	t_grantLeader.iterations = t;
+    	t_grantNonLeader.iterations = clientsCount - t;
+
+    	{
+        	auto start = clock::now();
+        	grantComputations();
+        	auto end = clock::now();
+        	t_grantLeader.total_time_us = end - start;
+    	}
+
+    	{
+        	auto start = clock::now();
+        	grantComputations_nonLeader();
+        	auto end = clock::now();
+        	t_grantNonLeader.total_time_us = end - start;
+    	}
+
+    	{
+        	auto start = clock::now();
+        	computeCombination();
+        	auto end = clock::now();
+        	t_computeCombination.total_time_us = end - start;
+    	}
+
+    	auto print_total_and_optional_average = [](const TimingRecord& rec) {
+        	// total time in microseconds
+        	std::chrono::duration<double, std::micro> test_time = rec.total_time_us;
+
+        	if (rec.compute_average) {
+        		double iterations = rec.iterations;
+            		double average_time = test_time.count() / iterations;
+
+            		std::cout << rec.name << " average execution time: \033[1;38;5;208m" 
+				<< average_time / 1000 << "ms\033[0m" << std::endl;
+        	}
+
+        	std::cout << rec.name << " total execution time: \033[1;38;5;208m"
+                  << test_time.count() / 1000 << "ms\033[0m" << std::endl;
+    	};
+
+	std::cout << "\n" << std::endl;
+    	print_total_and_optional_average(t_selectLeaders);
+    	print_total_and_optional_average(t_grantLeader);
+    	print_total_and_optional_average(t_grantNonLeader);
+    	print_total_and_optional_average(t_computeCombination);
+	std::cout << "\n" << std::endl;
+
+    	return getG_vector();
+}
 
 

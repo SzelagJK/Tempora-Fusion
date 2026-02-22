@@ -19,7 +19,7 @@ const void Setup_S::setFieldParams(int d) {
 };
 
 const void Setup_S::generatePublicX() {
-	std::cout << " [SETUP] Generating Public coords X" << std::endl;
+	std::cout << "[SETUP] Generating Public coords X" << std::endl;
 	assert(!IsZero(ZZ_p::modulus()));
 	assert(X.length() == 0); // Ensure X has not been already generated 
 	// Detailed construction 1b, t_dash = t + 2 

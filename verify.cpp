@@ -108,12 +108,57 @@ void Verify::g_decide() {
 }
 
 int Verify::g_verify() {
-	g_checkCommitments();
-	g_checkRoots_and_Result();
-	g_decide();
-	
-	int out = (flag == true) ? 1 : 0;
-	return out;
+        using clock = std::chrono::high_resolution_clock;
+
+        struct TimingRecord {
+                std::string name;
+                std::chrono::duration<double, std::micro> total_time_us{0};
+        };
+
+        TimingRecord t_total{"g_verify (total)", {}};
+        TimingRecord t_checkCommitments{"g_checkCommitments", {}};
+        TimingRecord t_checkRootsAndResult{"g_checkRoots_and_Result", {}};
+        TimingRecord t_decide{"g_decide", {}};
+
+        auto total_start = clock::now();
+
+        {
+                auto start = clock::now();
+                g_checkCommitments();
+                auto end = clock::now();
+                t_checkCommitments.total_time_us = end - start;
+        }
+
+        {
+                auto start = clock::now();
+                g_checkRoots_and_Result();
+                auto end = clock::now();
+                t_checkRootsAndResult.total_time_us = end - start;
+        }
+
+        {
+                auto start = clock::now();
+                g_decide();
+                auto end = clock::now();
+                t_decide.total_time_us = end - start;
+        }
+
+        auto total_end = clock::now();
+        t_total.total_time_us = total_end - total_start;
+
+        auto print_total = [](const TimingRecord& rec) {
+                std::chrono::duration<double, std::micro> test_time = rec.total_time_us;
+                std::cout << rec.name << " total execution time: \033[1;38;5;208m"
+                          << test_time.count() / 1000 << "ms\033[0m" << std::endl;
+        };
+
+        print_total(t_checkCommitments);
+        print_total(t_checkRootsAndResult);
+        print_total(t_decide);
+        print_total(t_total);
+
+        int out = (flag == true) ? 1 : 0;
+        return out;
 }
 
 void Verify::o_checkCommitments() {
@@ -127,12 +172,49 @@ void Verify::o_decide() {
 	std::string verificationOutcome = (flag == true) ? "\033[1;32mAccepted.\033[0m" : "\033[1;31mRejected.\033[0m";
 	std::cout << "\nVerification for puzzle o: " << verificationOutcome << std::endl;	
 }
-
 int Verify::o_verify() {
-	o_checkCommitments();
-	o_decide();
-	
-	int out = (flag == true) ? 1 : 0;
-	return out;
+        using clock = std::chrono::high_resolution_clock;
+
+        struct TimingRecord {
+                std::string name;
+                std::chrono::duration<double, std::micro> total_time_us{0};
+        };
+
+        TimingRecord t_total{"o_verify (total)", {}};
+        TimingRecord t_checkCommitments{"o_checkCommitments", {}};
+        TimingRecord t_decide{"o_decide", {}};
+
+        auto total_start = clock::now();
+
+        {
+                auto start = clock::now();
+                o_checkCommitments();
+                auto end = clock::now();
+                t_checkCommitments.total_time_us = end - start;
+        }
+
+        {
+                auto start = clock::now();
+                o_decide();
+                auto end = clock::now();
+                t_decide.total_time_us = end - start;
+        }
+
+        auto total_end = clock::now();
+        t_total.total_time_us = total_end - total_start;
+
+        auto print_total = [](const TimingRecord& rec) {
+                std::chrono::duration<double, std::micro> test_time = rec.total_time_us;
+                std::cout << rec.name << " total execution time: \033[1;38;5;208m"
+                          << test_time.count() / 1000 << "ms\033[0m" << std::endl;
+        };
+
+        print_total(t_checkCommitments);
+        print_total(t_decide);
+        print_total(t_total);
+
+        int out = (flag == true) ? 1 : 0;
+        return out;
 }
+
 

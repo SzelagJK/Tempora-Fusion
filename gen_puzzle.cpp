@@ -70,7 +70,7 @@ void VHLCTLP_GenPuzzles::generateSecretKeys() {
 		keys.append(key);
 		tmp_SP.append(sp_u);
 
-		std::cout << "[GenPuzzles] Secret keys generated (" << i+1 << "/" << K.size() << ")" << std::endl;
+		//std::cout << "[GenPuzzles] Secret keys generated (" << i+1 << "/" << K.size() << ")" << std::endl;
 	}
 	T = tmp_T;
 	N = tmp_N;
@@ -101,7 +101,7 @@ void VHLCTLP_GenPuzzles::generateBlindingFactors() {
     		}	
     		tmp[c] = per_client;
 
-		std::cout << "[GenPuzzles] Blind factors generated (" << c+1 << "/" << clientsCount << ")" << std::endl;
+		//std::cout << "[GenPuzzles] Blind factors generated (" << c+1 << "/" << clientsCount << ")" << std::endl;
   	}
 
   	blindingFactors = tmp;
@@ -122,7 +122,7 @@ void VHLCTLP_GenPuzzles::encodeMessages() {
 		}
 		tmp_encodedMessages.append(enc);
 
-		std::cout << "[GenPuzzles] Message encoded (" << i+1 << "/" << M.length() << ")" << std::endl;
+		//std::cout << "[GenPuzzles] Message encoded (" << i+1 << "/" << M.length() << ")" << std::endl;
 	}
 	encodedMessages = tmp_encodedMessages;
 }
@@ -146,7 +146,7 @@ void VHLCTLP_GenPuzzles::encryptMessages() {
 
     		tmp_encryptedMessages.append(o_vector);
 
-		std::cout << "[GenPuzzles] Message encrypted (" << c+1 << "/" << encodedMessages.length() << ")" << std::endl;
+		//std::cout << "[GenPuzzles] Message encrypted (" << c+1 << "/" << encodedMessages.length() << ")" << std::endl;
   	}
 
   	encryptedMessages = tmp_encryptedMessages;
@@ -160,7 +160,7 @@ void VHLCTLP_GenPuzzles::commitMessages() {
 		ZZ comm = commit(M[i], secretKeys[i][0]);
 		tmp_commitments.append(comm);
 
-		std::cout << "[GenPuzzles] Message commited (" << i+1 << "/" << M.length() << ")" << std::endl;
+		//std::cout << "[GenPuzzles] Message commited (" << i+1 << "/" << M.length() << ")" << std::endl;
 	}
 	messageCommitments = tmp_commitments;
 }
@@ -168,34 +168,103 @@ void VHLCTLP_GenPuzzles::commitMessages() {
 // VHLCTLP: 3g
 // Repesent all ZZ_p as ZZ for containment puposes
 const GenPuzzlesOutput VHLCTLP_GenPuzzles::generate_and_publish() {
-	GenPuzzlesOutput out;
-	Vec<Vec<ZZ>> tmp_PP;
-	
-	checkParams();
-	generateSecretKeys();
-	generateBlindingFactors();
-	encodeMessages();
-	encryptMessages();
-	commitMessages();
+        using clock = std::chrono::high_resolution_clock;
 
-	out.o_vectors = encryptedMessages;
+        struct TimingRecord {
+                std::string name;
+                std::chrono::duration<double, std::micro> total_time_us{0};
+        };
 
-	tmp_PP.append(messageCommitments);
-	tmp_PP.append(T);
-	tmp_PP.append(R);
-	tmp_PP.append(N);
-	out.PP = tmp_PP;
+        TimingRecord t_total{"generate_and_publish (total)", {}};
+        TimingRecord t_checkParams{"checkParams", {}};
+        TimingRecord t_generateSecretKeys{"generateSecretKeys", {}};
+        TimingRecord t_generateBlindingFactors{"generateBlindingFactors", {}};
+        TimingRecord t_encodeMessages{"encodeMessages", {}};
+        TimingRecord t_encryptMessages{"encryptMessages", {}};
+        TimingRecord t_commitMessages{"commitMessages", {}};
 
-	// set PRM
-	// do something with it later
-	PRMContainer tmp_PRM;
-	tmp_PRM.SP = SP;
-	tmp_PRM.PP = tmp_PP;
-	PRM = tmp_PRM; // Keep in mind that this is a container of vectors, so reach for a corresponding index for i-th clients prm_u
+        auto total_start = clock::now();
+
+        GenPuzzlesOutput out;
+        Vec<Vec<ZZ>> tmp_PP;
+
+        {
+                auto start = clock::now();
+                checkParams();
+                auto end = clock::now();
+                t_checkParams.total_time_us = end - start;
+        }
+
+        {
+                auto start = clock::now();
+                generateSecretKeys();
+                auto end = clock::now();
+                t_generateSecretKeys.total_time_us = end - start;
+        }
+
+        {
+                auto start = clock::now();
+                generateBlindingFactors();
+                auto end = clock::now();
+                t_generateBlindingFactors.total_time_us = end - start;
+        }
+
+        {
+                auto start = clock::now();
+                encodeMessages();
+                auto end = clock::now();
+                t_encodeMessages.total_time_us = end - start;
+        }
+
+        {
+                auto start = clock::now();
+                encryptMessages();
+                auto end = clock::now();
+                t_encryptMessages.total_time_us = end - start;
+        }
+
+        {
+                auto start = clock::now();
+                commitMessages();
+                auto end = clock::now();
+                t_commitMessages.total_time_us = end - start;
+        }
+
+        auto total_end = clock::now();
+        t_total.total_time_us = total_end - total_start;
+
+        out.o_vectors = encryptedMessages;
+
+        tmp_PP.append(messageCommitments);
+        tmp_PP.append(T);
+        tmp_PP.append(R);
+        tmp_PP.append(N);
+        out.PP = tmp_PP;
+
+        PRMContainer tmp_PRM;
+        tmp_PRM.SP = SP;
+        tmp_PRM.PP = tmp_PP;
+        PRM = tmp_PRM;
+
+        auto print_total = [](const TimingRecord& rec) {
+                std::chrono::duration<double, std::micro> test_time = rec.total_time_us;
+                std::cout << rec.name << " total execution time: \033[1;38;5;208m"
+                          << test_time.count() / 1000 << "ms\033[0m" << std::endl;
+        };
 
 	std::cout << "[GenPuzzles] Puzzle generation complete" << std::endl;
 
-	return out;
+	std::cout << "\n" << std::endl;
+        print_total(t_checkParams);
+        print_total(t_generateSecretKeys);
+        print_total(t_generateBlindingFactors);
+        print_total(t_encodeMessages);
+        print_total(t_encryptMessages);
+        print_total(t_commitMessages);
+        print_total(t_total);
+	std::cout << "\n" << std::endl;
+
+        return out;
 }
 
 const PRMContainer VHLCTLP_GenPuzzles::getPRMs() const {return PRM;};
