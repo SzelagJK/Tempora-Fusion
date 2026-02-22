@@ -476,9 +476,11 @@ void testLinearComb() {
 	oSolver.o_solve();
 
 
-	Verify gVerifier = Verify(1, gSolver.g_output, gSolver.g_proof, combinedPuzzle, LinCombGenerator.getPP_eval(), PRMs_input.PP, test_prime, S.getX(), leader_clients);
+	Verify gVerifier = Verify(1, gSolver.g_output, gSolver.g_proof, combinedPuzzle, LinCombGenerator.getPP_eval(), test_prime, S.getX(), leader_clients);
 	int g_outcome = gVerifier.g_verify();
 
+	Verify oVerifier = Verify(0, oSolver.o_output, oSolver.o_proof, output.o_vectors[targetClient], PRMs_input.PP[targetClient]);
+	int o_outcome = oVerifier.o_verify();
 }
 
 int main() {

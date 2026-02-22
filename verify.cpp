@@ -6,7 +6,6 @@ Verify::Verify(
 		Vec<Vec<ZZ>> g_proof, 
 		Vec<ZZ_p> puzzle_vector, 
 		Vec<Vec<ZZ>> PP_eval, 
-		Vec<Vec<ZZ>> PP, 
 		ZZ p,
 		Vec<ZZ_p> X,
 		int t) : 
@@ -15,7 +14,6 @@ Verify::Verify(
 	g_proof(std::move(g_proof)),
 	puzzle_vector(std::move(puzzle_vector)),
 	PP_eval(std::move(PP_eval)),
-	PP(std::move(PP)),
 	p(std::move(p)),
 	X(std::move(X)),
 	t(std::move(t)) {
@@ -27,12 +25,12 @@ Verify::Verify(
 		ZZ_p m,
 		ZZ o_proof,
 		Vec<ZZ_p> puzzle_vector,
-		Vec<Vec<ZZ>> PP) : 
+		Vec<ZZ> pp_u) : 
 	cmd(std::move(cmd)),
 	m(std::move(m)),
 	o_proof(std::move(o_proof)),
 	puzzle_vector(std::move(puzzle_vector)),
-	PP(std::move(PP)) {
+	pp_u(std::move(pp_u)) {
 		assert(cmd == 0);
 	};
 
@@ -113,6 +111,26 @@ int Verify::g_verify() {
 	g_checkCommitments();
 	g_checkRoots_and_Result();
 	g_decide();
+	
+	int out = (flag == true) ? 1 : 0;
+	return out;
+}
+
+void Verify::o_checkCommitments() {
+	std::cout << "\n[Verify] Checking commitment openings\n" << std::endl; 
+	ZZ comm	= commit(rep(m), o_proof);
+	std::string checkOutcome = (comm == pp_u[0]) ? "Pass" : "Fail";
+	std::cout << "Commitment check: " << checkOutcome << std::endl;
+}
+
+void Verify::o_decide() {
+	std::string verificationOutcome = (flag == true) ? "Accepted." : "Rejected.";
+	std::cout << "\nVerification for puzzle o: " << verificationOutcome << std::endl;	
+}
+
+int Verify::o_verify() {
+	o_checkCommitments();
+	o_decide();
 	
 	int out = (flag == true) ? 1 : 0;
 	return out;

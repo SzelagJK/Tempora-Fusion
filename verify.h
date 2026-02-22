@@ -23,7 +23,7 @@ class Verify {
 		ZZ o_proof;
 		Vec<ZZ_p> puzzle_vector;
 		Vec<Vec<ZZ>> PP_eval;
-		Vec<Vec<ZZ>> PP;
+		Vec<ZZ> pp_u;
 		ZZ p;
 		Vec<ZZ_p> X;
 		int t;
@@ -44,7 +44,6 @@ class Verify {
 			Vec<Vec<ZZ>> g_proof, 
 			Vec<ZZ_p> puzzle_vector, 
 			Vec<Vec<ZZ>> PP_eval, 
-			Vec<Vec<ZZ>> PP, 
 			ZZ p, 
 			Vec<ZZ_p> X, 
 			int t); // combination
@@ -53,7 +52,7 @@ class Verify {
 			ZZ_p m,
 			ZZ o_proof,
 			Vec<ZZ_p> puzzle_vector,
-			Vec<Vec<ZZ>> PP); // single
+			Vec<ZZ> pp_u); // single
 		int g_verify();
 		int o_verify();
 };
