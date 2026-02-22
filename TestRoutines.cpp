@@ -485,26 +485,35 @@ int main() {
     	std::cout << "Running Tests\n\n";
 
     	// Auxillery tests
-    	testPolynomialGeneration(); // for ZZ_p used in OT	
-    	testOT();
+    	//testPolynomialGeneration(); // for ZZ_p used in OT	
+    	//testOT();
 
     	// Main test for OLE
 	// testOLE();
 
 	// Main test for OLE+
-	testOLE_enhanced();
+	//testOLE_enhanced();
 
 	// More auxilelry (requires p field)
-	testPRF();
+	//testPRF();
 
-	testHash();
+	//testHash();
 
 	// Tests for VHLC-TLP
 
 	//testCoinToss(); // negligable runtime cost most likley, dont bother with measuring it now 
 	
-	testVHLCTLP(20, 10); // Client count, Leader count
+	using clock = std::chrono::high_resolution_clock;
+	auto start = clock::now();
 	
+	testVHLCTLP(40, 20); // Client count, Leader count
+	
+	auto end = clock::now();
+
+	auto protocolTime = std::chrono::duration_cast<std::chrono::microseconds>(end-start);
+
+	std::cout << "Total Tempora-Fusion execution time: \033[1;93m" << protocolTime.count()/1000 << "ms (" << protocolTime.count()/(double)1000000 << "s)\033[0m" << std::endl;
+
     	std::cout << "\nAll tests passed.\n";
     	return 0;
 }

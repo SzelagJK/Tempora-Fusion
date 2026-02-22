@@ -190,7 +190,7 @@ Implements `S.Setup(1^lambda, t, t_dash)`
 Generates:
 
 - Large prime `p`  
-- Set `(X = \{x_1, ..., x_(t_dash))`
+- Set `(X = {x_1, ..., x_(t_dash)})`
 
 Matches the protocol Setup stage.
 
@@ -198,7 +198,7 @@ Matches the protocol Setup stage.
 
 ### Puzzle Generation — `gen_puzzle.cpp`
 
-Implements `GenPuzzle(m_u, K_u, pks, delta_u, maxss)`
+Implements `GenPuzzle(m_u, K_u, pks, delta_u, max_ss)`
 
 Steps:
 
