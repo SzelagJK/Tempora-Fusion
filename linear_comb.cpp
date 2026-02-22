@@ -27,7 +27,7 @@ void LinearCombinations::selectLeaders() {
 }
 
 void LinearCombinations::grantComputations() {
-	std::cout << "[LinearComb] Granting computations (leaders)" << std::endl;
+	std::cout << "\n[LinearComb] Granting computations (leaders)" << std::endl;
 
 	// Temporary containers for some class variables, exception safety (commit-or-rollback)  
 	Vec<Vec<ZZ>> tmp_tK;
@@ -131,6 +131,8 @@ void LinearCombinations::grantComputations() {
 			zwz_u.append(zwz);
 		}
 		regeneratedFactors.append(zwz_u);
+
+		std::cout << "[LinearComb] Fresh keys and factors generated (" << i+1 << "/" << t << ")" << std::endl;
 		
 	}
 
@@ -183,7 +185,6 @@ void LinearCombinations::grantComputations() {
 
 		// OLE+ re-encodings
 		Vec<ZZ_p> d_vector;
-		std::cout << "Regenerated Factors check: " << regeneratedFactors.length() << std::endl;
 		for (int j = 0; j < t+2; j++) {
 			ZZ_p e = leader_client.q * vy_factors[0][j] * inv(to_ZZ_p(regeneratedFactors[i][j][1]));
 			ZZ_p e_prime = -(leader_client.q * vy_factors[0][j] * to_ZZ_p(regeneratedFactors[i][j][0])) + to_ZZ_p(regeneratedFactors[i][j][2]) + vy_factors[1][j];
@@ -205,6 +206,8 @@ void LinearCombinations::grantComputations() {
 		ZZ comm_prime = commit(rep(roots[i]), tmp_tK[i][0]);
 
 		PP_Eval[2].append(comm_prime);
+
+		std::cout << "[LinearComb] Computations (leader) granted (" << i+1 << "/" << t << ")" << std::endl;
 	}
 
 	tK = tmp_tK;
@@ -213,7 +216,8 @@ void LinearCombinations::grantComputations() {
 }
 
 void LinearCombinations::grantComputations_nonLeader() {
-	std::cout << "[LinearComb] Granting computations (non-leaders)" << std::endl;
+	std::cout << "\n[LinearComb] Granting computations (non-leaders)" << std::endl;
+	int c = 1; // for terminal output only
 	for (int i = 0; i < clientsCount; i++) {
 		if (std::binary_search(selected_leaders.begin(), selected_leaders.end(), i))
 				continue;
@@ -268,25 +272,15 @@ void LinearCombinations::grantComputations_nonLeader() {
 			d_vector.append(d);
 		}
 		d_vector_nonLeaders.append(d_vector);
+
+		std::cout << "[LinearComb] Computations (non-leader) granted (" << c << "/" << clientsCount - t << ")" << std::endl;
+		c++;
 	}
 
 };
 
 void LinearCombinations::computeCombination() {
-	std::cout << "[LinearComb] Combining puzzles" << std::endl;
-
-	std::cout << "leaders contributed: " << d_vector_leaders.length() << "\n";
-	std::cout << "nonleaders contributed: " << d_vector_nonLeaders.length() << "\n";
-	
-	// debug
-	for (int i = 0; i < Y_all.length(); i++) {
-		ZZ_p sum = ZZ_p(0);
-		for (int j = 0; j < Y_all[i].length(); j++) {
-			sum += Y_all[i][j];
-		}
-		
-		std::cout << "[LinearComb Debug] end sum of y_" << i << ": " << sum << std::endl;
-	}
+	std::cout << "\n[LinearComb] Combining puzzles" << std::endl;
 
 	Vec<ZZ_p> tmp_g_vector;
 	for (int i = 0; i < t+2; i++) {
@@ -300,6 +294,9 @@ void LinearCombinations::computeCombination() {
 		tmp_g_vector.append(g);
 	}
 	g_vector = tmp_g_vector;
+
+	std::cout << "[LinearComb] Leaders contributed: " << d_vector_leaders.length() << std::endl;
+	std::cout << "[LinearComb] Non-leaders contributed: " << d_vector_nonLeaders.length() << std::endl;
 };
 
 const Vec<ZZ_p> LinearCombinations::getG_vector() const {return g_vector;};
@@ -309,6 +306,7 @@ const std::vector<int> LinearCombinations::get_leaderIndices() const {return sel
 const Vec<ZZ_p> LinearCombinations::get_roots() const {return roots;};
 
 const Vec<ZZ_p> LinearCombinations::compute_and_publish() {
+	//perform unit tests here most likely
 	selectLeaders();
 	grantComputations();
 	grantComputations_nonLeader();

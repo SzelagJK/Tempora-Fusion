@@ -41,7 +41,7 @@ void Verify::g_checkCommitments() {
 		bool anyValid = false;
 		for (int j = 0; j < PP_eval[2].length(); j++) 
 			if (comm == PP_eval[2][j]) anyValid = true;
-		std::string checkOutcome = (anyValid == true) ? "Pass" : "Fail";
+		std::string checkOutcome = (anyValid == true) ? "\033[32mPass\033[0m" : "\033[31mFail\033[0m";
 		std::cout << "Commitment check for root " << i+1 << "/" << g_proof[0].length() << ": " << checkOutcome << std::endl;
 		if (anyValid != true) flag = false;
 	}
@@ -78,7 +78,7 @@ void Verify::g_checkRoots_and_Result() {
 
 	for (int i = 0; i < extracted_roots.length(); i++) {
 		ZZ_p val = evaluate_and_interpolate(X, theta, extracted_roots[i]);
-		std::string checkOutcome = (val == 0) ? "Pass" : "Fail";
+		std::string checkOutcome = (val == 0) ? "\033[32mPass\033[0m" : "\033[31mFail\033[0m";
 		std::cout << "Validity check for root " << i+1 << "/" << extracted_roots.length() << ": " << checkOutcome << std::endl;
 		if (val != 0) flag = false;
 	}
@@ -103,7 +103,7 @@ void Verify::g_checkRoots_and_Result() {
 }
 
 void Verify::g_decide() {
-	std::string verificationOutcome = (flag == true) ? "Accepted." : "Rejected.";
+	std::string verificationOutcome = (flag == true) ? "\033[1;32mAccepted.\033[0m" : "\033[1;31mRejected.\033[0m";
 	std::cout << "\nVerification for puzzle combination g: " << verificationOutcome << std::endl;
 }
 
@@ -119,12 +119,12 @@ int Verify::g_verify() {
 void Verify::o_checkCommitments() {
 	std::cout << "\n[Verify] Checking commitment openings\n" << std::endl; 
 	ZZ comm	= commit(rep(m), o_proof);
-	std::string checkOutcome = (comm == pp_u[0]) ? "Pass" : "Fail";
+	std::string checkOutcome = (comm == pp_u[0]) ? "\033[32mPass\033[0m" : "\033[31mFail\033[0m";
 	std::cout << "Commitment check: " << checkOutcome << std::endl;
 }
 
 void Verify::o_decide() {
-	std::string verificationOutcome = (flag == true) ? "Accepted." : "Rejected.";
+	std::string verificationOutcome = (flag == true) ? "\033[1;32mAccepted.\033[0m" : "\033[1;31mRejected.\033[0m";
 	std::cout << "\nVerification for puzzle o: " << verificationOutcome << std::endl;	
 }
 

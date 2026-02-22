@@ -386,18 +386,16 @@ void testLinearComb() {
         int leader_clients = 2;
 	int total_clients = leader_clients + 3;
 
-        std::cout << "[LinearComb]Server Setup Checks" << std::endl;
+        std::cout << "\n[LinearComb] Server Setup" << std::endl;
         Setup_S S = Setup_S(test_prime, leader_clients);
-        std::cout << "[LinearComb]Leader Qty check: " << S.getLeaderQty() << std::endl;
+        std::cout << "[LinearComb] Leader Qty check: " << S.getLeaderQty() << std::endl;
         S.setFieldParams(1);
         S.generatePublicX();
-        std::cout << "[LinearComb] Public X check: " << S.getX().length() << std::endl;
 
         std::cout << "\n[LinearComb] Client Setup Checks" << std::endl;
         long lambda = 2048; // key bits for the second primitive
         Setup_C C = Setup_C(lambda);
         std::vector<Setup_C> clients = setupMultipleClients(lambda, total_clients); // min treshold: t+2
-        std::cout << "[LinearComb] Client list check: " << clients.size() << std::endl;
 
 	// Generate Puzzles
 	std::cout << "\n[LinearComb] Generating puzzles" << std::endl;
@@ -410,18 +408,15 @@ void testLinearComb() {
 		std::cout << "m: " << m << std::endl;
 		sum += to_ZZ_p(m);
         }
-	std::cout << "True sum: " << sum << std::endl;
+	std::cout << "\033[33m[DEBUG]\033[0m True sum: " << sum << std::endl;
         std::vector<int> delta;
         for (int i = 0; i < total_clients; i++) {
                 int d = static_cast<int>(RandomBnd(9) + 1);
                 delta.push_back(d);
         }
         int max_ss = 10;
-	std::cout << "X: " << S.getX() << std::endl;
         VHLCTLP_GenPuzzles PuzzleGenerator(M, clients, test_prime, S.getX(), leader_clients, total_clients, delta, max_ss);
         GenPuzzlesOutput output = PuzzleGenerator.generate_and_publish();
-        std::cout << "\n[LinearComb] Generator check (size): " << output.o_vectors.length() << std::endl;
-        std::cout << "[LinearComb] Generator check (puzzle u=0): " << output.o_vectors[0] << std::endl;
 
 	std::cout << "\n[LinearComb] Adjusting linear comb inputs" << std::endl;
 	// Adjust input for linear combinations
@@ -435,7 +430,6 @@ void testLinearComb() {
        	S_input.t = leader_clients;
 	// do the same for all clients
 	std::vector<C_LinearCombInput> C_vector;
-	std::cout << "Size: " << clients.size() << std::endl;
 	for (int i = 0; i < clients.size(); i++) {
 		C_LinearCombInput C_input;
 		C_input.delta_puzzle = delta[i];
@@ -454,7 +448,6 @@ void testLinearComb() {
 	LinearCombinations LinCombGenerator = LinearCombinations(S_input, C_vector, PRMs_input, leader_clients, total_clients, OLE_p, PF);
 	std::cout << "\n[LinearComb] Computing combination" << std::endl;
 	Vec<ZZ_p> combinedPuzzle = LinCombGenerator.compute_and_publish();
-	std::cout << "[LinearComb] G vector check: " << combinedPuzzle.length() << std::endl;
 	std::cout << "[LinearComb] Puzzle g: " << combinedPuzzle << std::endl;
 
 
@@ -465,8 +458,6 @@ void testLinearComb() {
 		Y_test.append(ZZ_p(2*i));
 	}
 	ZZ_p eval_inter = evaluate_and_interpolate(X_test, Y_test);
-	std::cout << "interpolation test: " << eval_inter << std::endl;
-
 
 	SolvePuzzle gSolver = SolvePuzzle(1, combinedPuzzle, LinCombGenerator.getPP_eval(), PRMs_input.PP, test_prime, S.getX(), leader_clients, LinCombGenerator.get_leaderIndices());
 	gSolver.g_solve();

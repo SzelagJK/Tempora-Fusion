@@ -16,7 +16,7 @@
 // class used for a single puzzle, not multiple
 class SolvePuzzle {
 	private:
-		const int cmd; // solvePzl or evalPzl (denoted as 0 or !0) (depending on if we are solving a single clients puzzle or a linear combination) 
+		const int cmd; // solvePzl or evalPzl (denoted as 0 or 1) (depending on if we are solving a single clients puzzle or a linear combination) 
 		Vec<ZZ_p> puzzle_vector; // ^either o or g 
 		int targetClient; 
 		Vec<Vec<ZZ>> PP_eval;
@@ -35,7 +35,7 @@ class SolvePuzzle {
 		ZZ_p cons;
 		ZZ_p res;
 		// single client puzzle	
-		Vec<ZZ> K; // single puzzles only
+		Vec<ZZ> K; 
 		Vec<ZZ_p> pi;
 
 		// combination

@@ -69,6 +69,8 @@ void VHLCTLP_GenPuzzles::generateSecretKeys() {
 
 		keys.append(key);
 		tmp_SP.append(sp_u);
+
+		std::cout << "[GenPuzzles] Secret keys generated (" << i+1 << "/" << K.size() << ")" << std::endl;
 	}
 	T = tmp_T;
 	N = tmp_N;
@@ -97,10 +99,13 @@ void VHLCTLP_GenPuzzles::generateBlindingFactors() {
       			zw.append(w);
       			per_client[j] = zw;
     		}	
-    	tmp[c] = per_client;
+    		tmp[c] = per_client;
+
+		std::cout << "[GenPuzzles] Blind factors generated (" << c+1 << "/" << clientsCount << ")" << std::endl;
   	}
 
   	blindingFactors = tmp;
+	
 }
 
 // VHLCTLP: 3d
@@ -116,6 +121,8 @@ void VHLCTLP_GenPuzzles::encodeMessages() {
 			enc.append(phi_i);
 		}
 		tmp_encodedMessages.append(enc);
+
+		std::cout << "[GenPuzzles] Message encoded (" << i+1 << "/" << M.length() << ")" << std::endl;
 	}
 	encodedMessages = tmp_encodedMessages;
 }
@@ -138,6 +145,8 @@ void VHLCTLP_GenPuzzles::encryptMessages() {
     		}
 
     		tmp_encryptedMessages.append(o_vector);
+
+		std::cout << "[GenPuzzles] Message encrypted (" << c+1 << "/" << encodedMessages.length() << ")" << std::endl;
   	}
 
   	encryptedMessages = tmp_encryptedMessages;
@@ -150,6 +159,8 @@ void VHLCTLP_GenPuzzles::commitMessages() {
 	for (int i = 0; i < M.length(); i++) {
 		ZZ comm = commit(M[i], secretKeys[i][0]);
 		tmp_commitments.append(comm);
+
+		std::cout << "[GenPuzzles] Message commited (" << i+1 << "/" << M.length() << ")" << std::endl;
 	}
 	messageCommitments = tmp_commitments;
 }
@@ -189,7 +200,6 @@ const GenPuzzlesOutput VHLCTLP_GenPuzzles::generate_and_publish() {
 
 const PRMContainer VHLCTLP_GenPuzzles::getPRMs() const {return PRM;};
 
-// note for later, move all outputs to private variables, set output to void
 
 
 

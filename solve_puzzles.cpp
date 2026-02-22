@@ -40,10 +40,10 @@ SolvePuzzle::SolvePuzzle(
 		assert(cmd == 0);
 	};
 
-// PzlEval
+// evalPzl
 
 void SolvePuzzle::g_findSecretKeys() {
-	std::cout << "[SolvePuzzle] Finding secret keys" << std::endl;
+	std::cout << "\n[SolvePuzzle] Finding secret keys" << std::endl;
 	tK.SetLength(3);
 	Vec<ZZ> tmp_tks;
 	Vec<ZZ> tmp_k_prime;
@@ -74,7 +74,7 @@ void SolvePuzzle::g_findSecretKeys() {
 }
 
 void SolvePuzzle::g_removeBlindFactors() {
-	std::cout << "[SolvePuzzle] Removing blind factors" << std::endl;
+	std::cout << "\n[SolvePuzzle] Removing blind factors" << std::endl;
 	std::cout << "[SolvePuzzle] (Sanity check) Prime p when solving: " << p << std::endl; 
 	std::cout << "[SolvePuzzle] (Sanity check) Global modulus: " << ZZ_p::modulus() << std::endl;
 	Vec<ZZ_p> tmp_theta;
@@ -96,28 +96,14 @@ void SolvePuzzle::g_removeBlindFactors() {
 }
 
 void SolvePuzzle::g_extractPolynomial() {
-	std::cout << "[SolvePuzzle] Extracting Polynomial" << std::endl;
-	
-	// check for correctness
-	Vec<ZZ_p> extracted_roots = interpolate_roots(X, theta);
-	for (int u = 0; u < extracted_roots.length(); u++) {
-   		ZZ_p val = evaluate_and_interpolate(X, theta, extracted_roots[u]);
-    		std::cout << "[SolvePuzzle] theta(root["<<u<<"]) = " << val << "\n";
-	}
-
-	// debug
-	//ZZ_pX P = interpolate_polynomial(X, theta);
-	//cons = eval(P, ZZ_p(0));
-	//Vec<ZZ_p> extracted_roots = interpolate_roots(X, theta);
-	//std::cout << "extracted roots: " << extracted_roots << std::endl;
-	
+	std::cout << "\n[SolvePuzzle] Extracting Polynomial" << std::endl;
 	// interpolate and evaluate at point 0, extracting the constant of theta(x) as presented on p.24 (Part 5, step c, detailed construction)
 	cons = evaluate_and_interpolate(X, theta);
 	std::cout << "[SolvePuzzle] cons: " << cons << std::endl;
 };
 
 void SolvePuzzle::g_extractLinearCombination() {
-	std::cout << "[SolvePuzzle] Extracting linear combination" << std::endl;
+	std::cout << "\n[SolvePuzzle] Extracting linear combination" << std::endl;
 	ZZ_p product = ZZ_p(1);
 	for (int i = 0; i < roots.length(); i++) {
 		product *= -roots[i];	
@@ -126,7 +112,7 @@ void SolvePuzzle::g_extractLinearCombination() {
 };
 
 void SolvePuzzle::g_extractValidRoots() {
-	std::cout << "[SolvePuzzle] Extracting valid roots" << std::endl;
+	std::cout << "\n[SolvePuzzle] Extracting valid roots" << std::endl;
 	Vec<ZZ_p> tmp_roots;
 	Vec<Vec<ZZ>> tmp_proof;
 	tmp_proof.SetLength(2);
@@ -149,7 +135,6 @@ void SolvePuzzle::g_extractValidRoots() {
 };
 
 void SolvePuzzle::g_publish() {
-	std::cout << "[SolvePuzzle] Publishing" << std::endl;
 	g_output = res;
 }
 
@@ -161,7 +146,7 @@ void SolvePuzzle::g_solve() {
 	g_extractLinearCombination();
 	g_publish();
 
-	std::cout << "\n[SolvePuzzle] PzlEval: " << g_output << std::endl;
+	std::cout << "\n[SolvePuzzle] \033[1;36mPzlEval: \033[0m" << g_output << std::endl;
 }
 
 // clientPzl
@@ -185,7 +170,7 @@ void SolvePuzzle::o_findSecretKeys() {
 }
 
 void SolvePuzzle::o_removeBlindFactors() {
-	std::cout << "[SolvePuzzle] Removing blinding factors" << std::endl;
+	std::cout << "\n[SolvePuzzle] Removing blinding factors" << std::endl;
 	Vec<Vec<ZZ_p>> clientBlindingFactors;
 	clientBlindingFactors.SetLength(2);
 	for (int i = 0; i < t + 2; i++) {
@@ -204,7 +189,6 @@ void SolvePuzzle::o_removeBlindFactors() {
 }
 
 void SolvePuzzle::o_extract_and_publish() {
-	std::cout << "[SolvePuzzle] Extracting and publishing" << std::endl;
 	ZZ_p m = evaluate_and_interpolate(X, pi); // considers the constant term of pi_u as the plaintext solution
 	o_output = m;
 	o_proof = K[0];
@@ -215,7 +199,7 @@ void SolvePuzzle::o_solve() {
 	o_removeBlindFactors();
 	o_extract_and_publish();
 	
-	std::cout << "\n[SolvePuzzle] clientPzl: " << o_output << std::endl;
+	std::cout << "\n[SolvePuzzle] \033[1;36mclientPzl: \033[0m" << o_output << std::endl;
 }
 
 
