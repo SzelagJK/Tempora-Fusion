@@ -35,7 +35,21 @@
 using namespace NTL;
 using namespace CryptoPP;
 
-// TESTS
+/* 
+ *	TESTS AND EXAMPLES
+ * 	
+ * 	Use for both tests and reference for usage, each funciton has been written with intentions of running independently.
+ *
+ * 	(the main exceptions are any functions that involve ZZ_p, where global modulus needs to be initialised,
+ * 	in that case, run testPolynomialGeneration() beforehand which will automatically initialise the global modulus and a
+ * 	polynomial field)
+ *
+ * 	To run the entire script, use:
+g++ gen_puzzle.cpp ope_interface.cpp poly_field.cpp rsa.cpp tlp.cpp commitment.cpp ole.cpp OT_1of2.cpp TestRoutines.cpp helper_functions.cpp ole_enhanced.cpp prf.cpp setup.cpp coin_toss.cpp linear_comb.cpp poly_interpolate.cpp solve_puzzles.cpp verify.cpp /usr/local/lib/libcryptopp.a -lntl -lgmp -lcryptopp -o VHLC_TLP.exe
+ * 	
+ * 	where /usr/local/lib/libcryptopp.a points to an .a file that was built form modern-cryptopp (for BLAKE3)
+ */
+
 
 void testRSASetup() {
     	std::cout << "[TEST] RSA setup...\n";
@@ -471,7 +485,7 @@ int main() {
     	std::cout << "Running Tests\n\n";
 
     	// Auxillery tests
-    	testPolynomialGeneration();	
+    	testPolynomialGeneration(); // for ZZ_p used in OT	
     	testOT();
 
     	// Main test for OLE
