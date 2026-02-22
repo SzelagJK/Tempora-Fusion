@@ -17,6 +17,27 @@ The implementation is named:
 
 ---
 
+## Compilation
+
+To compile the entire Tempora-Fusion protocol:
+
+```bash
+g++ gen_puzzle.cpp ope_interface.cpp poly_field.cpp rsa.cpp tlp.cpp commitment.cpp ole.cpp OT_1of2.cpp TestRoutines.cpp helper_functions.cpp ole_enhanced.cpp prf.cpp setup.cpp coin_toss.cpp linear_comb.cpp poly_interpolate.cpp solve_puzzles.cpp verify.cpp /usr/local/lib/libcryptopp.a -lntl -lgmp -lcryptopp -o VHLC_TLP.exe
+```
+
+### Important
+
+- `/usr/local/lib/libcryptopp.a` must point to a static library built from **modern-cryptopp**
+- The implementation requires modern **Crypto++** due to BLAKE3 hash usage
+
+### External Dependencies
+
+- Crypto++ (modern-cryptopp)
+- NTL
+- GMP
+
+---
+
 ## Architectural Overview
 
 The implementation strictly follows the layered construction described in Section 5.2 of the paper.
@@ -288,25 +309,6 @@ Which validate:
 - End-to-end evaluation and verification  
 - **Runs the entire Tempora-Fusion protocol with unit tests**
 
----
 
-## Compilation
-
-To compile the entire Tempora-Fusion protocol:
-
-```bash
-g++ gen_puzzle.cpp ope_interface.cpp poly_field.cpp rsa.cpp tlp.cpp commitment.cpp ole.cpp OT_1of2.cpp TestRoutines.cpp helper_functions.cpp ole_enhanced.cpp prf.cpp setup.cpp coin_toss.cpp linear_comb.cpp poly_interpolate.cpp solve_puzzles.cpp verify.cpp /usr/local/lib/libcryptopp.a -lntl -lgmp -lcryptopp -o VHLC_TLP.exe
-```
-
-### Important
-
-- `/usr/local/lib/libcryptopp.a` must point to a static library built from **modern-cryptopp**
-- The implementation requires modern **Crypto++** due to BLAKE3 hash usage
-
-### External Dependencies
-
-- Crypto++ (modern-cryptopp)
-- NTL
-- GMP
 
 
