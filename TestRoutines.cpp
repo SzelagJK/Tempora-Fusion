@@ -383,8 +383,8 @@ void testLinearComb() {
 	std::cout << "\n\n [TEST] VHLC-TLP LinearCombination" << std::endl;
         int key_bits = 128;
         ZZ test_prime = GenPrime_ZZ(key_bits);
-        int leader_clients = 2;
-	int total_clients = leader_clients + 3;
+        int leader_clients = 20;
+	int total_clients = leader_clients + 80;
 
         std::cout << "\n[LinearComb] Server Setup" << std::endl;
         Setup_S S = Setup_S(test_prime, leader_clients);
