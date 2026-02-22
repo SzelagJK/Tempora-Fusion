@@ -29,6 +29,7 @@
 #include "linear_comb.h"
 #include "poly_interpolate.h"
 #include "solve_puzzles.h"
+#include "verify.h"
 
 using namespace NTL;
 using namespace CryptoPP;
@@ -382,8 +383,8 @@ void testLinearComb() {
 	std::cout << "\n\n [TEST] VHLC-TLP LinearCombination" << std::endl;
         int key_bits = 128;
         ZZ test_prime = GenPrime_ZZ(key_bits);
-        int leader_clients = 4;
-	int total_clients = leader_clients + 6;
+        int leader_clients = 2;
+	int total_clients = leader_clients + 3;
 
         std::cout << "[LinearComb]Server Setup Checks" << std::endl;
         Setup_S S = Setup_S(test_prime, leader_clients);
@@ -467,12 +468,16 @@ void testLinearComb() {
 	std::cout << "interpolation test: " << eval_inter << std::endl;
 
 
-	SolvePuzzle gSolver = SolvePuzzle(1, combinedPuzzle, LinCombGenerator.getPP_eval(), PRMs_input.PP, LinCombGenerator.get_roots(), test_prime, S.getX(), leader_clients, LinCombGenerator.get_leaderIndices());
+	SolvePuzzle gSolver = SolvePuzzle(1, combinedPuzzle, LinCombGenerator.getPP_eval(), PRMs_input.PP, test_prime, S.getX(), leader_clients, LinCombGenerator.get_leaderIndices());
 	gSolver.g_solve();
 
 	int targetClient = 0;
-	SolvePuzzle oSolver = SolvePuzzle(0, output.o_vectors[targetClient], targetClient, PRMs_input.PP, LinCombGenerator.get_roots(), test_prime, S.getX(), leader_clients);
+	SolvePuzzle oSolver = SolvePuzzle(0, output.o_vectors[targetClient], targetClient, PRMs_input.PP, test_prime, S.getX(), leader_clients);
 	oSolver.o_solve();
+
+
+	Verify gVerifier = Verify(1, gSolver.g_output, gSolver.g_proof, combinedPuzzle, LinCombGenerator.getPP_eval(), PRMs_input.PP, test_prime, S.getX(), leader_clients);
+	int g_outcome = gVerifier.g_verify();
 
 }
 

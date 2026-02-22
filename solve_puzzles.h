@@ -52,14 +52,13 @@ class SolvePuzzle {
 	public: 
 		ZZ_p g_output;
 		ZZ_p o_output;
-		Vec<Vec<ZZ_p>> g_proof;
+		Vec<Vec<ZZ>> g_proof;
 		ZZ o_proof;
 		SolvePuzzle(
 			int cmd, 
 			Vec<ZZ_p> puzzle_vector, 
 			Vec<Vec<ZZ>> PP_eval, 
 			Vec<Vec<ZZ>> PP,
-			Vec<ZZ_p> roots,
 			ZZ p, 
 			Vec<ZZ_p> X, 
 			int t, 
@@ -69,7 +68,6 @@ class SolvePuzzle {
 			Vec<ZZ_p> puzzle_vector, 
 			int targetClient,
 			Vec<Vec<ZZ>> PP, 
-			Vec<ZZ_p> roots,
 			ZZ p, 
 			Vec<ZZ_p> X, 
 			int t); // single

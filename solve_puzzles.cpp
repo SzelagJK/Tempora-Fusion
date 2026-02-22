@@ -6,7 +6,6 @@ SolvePuzzle::SolvePuzzle(
 		Vec<ZZ_p> puzzle_vector, 
 		Vec<Vec<ZZ>> PP_eval, 
 		Vec<Vec<ZZ>> PP, 
-		Vec<ZZ_p> roots,
 		ZZ p, 
 		Vec<ZZ_p> X, 
 		int t, 
@@ -15,7 +14,6 @@ SolvePuzzle::SolvePuzzle(
 	puzzle_vector(std::move(puzzle_vector)), 
 	PP_eval(std::move(PP_eval)), 
 	PP(std::move(PP)),
-	roots(std::move(roots)),
 	p(std::move(p)), 
 	X(std::move(X)), 
 	t(std::move(t)),
@@ -29,7 +27,6 @@ SolvePuzzle::SolvePuzzle(
 		Vec<ZZ_p> puzzle_vector, 
 		int targetClient,
 		Vec<Vec<ZZ>> PP, 
-		Vec<ZZ_p> roots,
 		ZZ p, 
 		Vec<ZZ_p> X, 
 		int t) : 
@@ -37,7 +34,6 @@ SolvePuzzle::SolvePuzzle(
 	puzzle_vector(std::move(puzzle_vector)), 
 	targetClient(std::move(targetClient)),
 	PP(std::move(PP)),
-	roots(std::move(roots)),
 	p(std::move(p)), 
 	X(std::move(X)), 
 	t(std::move(t)) {
@@ -132,23 +128,20 @@ void SolvePuzzle::g_extractLinearCombination() {
 void SolvePuzzle::g_extractValidRoots() {
 	std::cout << "[SolvePuzzle] Extracting valid roots" << std::endl;
 	Vec<ZZ_p> tmp_roots;
-	Vec<Vec<ZZ_p>> tmp_proof;
+	Vec<Vec<ZZ>> tmp_proof;
 	tmp_proof.SetLength(2);
 
 	Vec<ZZ_p> extracted_roots = interpolate_roots(X, theta);	
-	std::cout << "[SolvePuzzle] extracted roots: " << roots << std::endl;
+	std::cout << "[SolvePuzzle] extracted roots: " << extracted_roots << std::endl;
 	for (int i = 0; i < extracted_roots.length(); i++) {
 		for (int j = 0; j < tK[0].length(); j++) {
 			ZZ comm = commit(rep(extracted_roots[i]), tK[0][j]);
 			if (comm == PP_eval[2][j]) {
 				tmp_roots.append(extracted_roots[i]);
-				tmp_proof[0].append(extracted_roots[i]);
-				tmp_proof[1].append(to_ZZ_p(tK[0][j]));
+				tmp_proof[0].append(rep(extracted_roots[i]));
+				tmp_proof[1].append(tK[0][j]);
 			}
 		}
-	}
-	if (tmp_proof[0].length() != roots.length()) {
-		std::cout << "[SolvePuzzle] WARNING: proof vector smaller than roots_u!" << std::endl;
 	}
 
 	roots = tmp_roots;

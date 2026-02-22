@@ -96,7 +96,7 @@ void VHLCTLP_GenPuzzles::generateBlindingFactors() {
       			zw.append(z);
       			zw.append(w);
       			per_client[j] = zw;
-    	}	
+    		}	
     	tmp[c] = per_client;
   	}
 
