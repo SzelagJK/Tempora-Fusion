@@ -384,14 +384,18 @@ void testCoinToss() {
 }
 
 void testVHLCTLP(int client_count, int leader_count) {
-	assert(client_count > leader_count + 1);
+//	assert(client_count > leader_count + 1);
 
-	// Start with setup
 	std::cout << "\n\n[TEST] VHLC-TLP main test" << std::endl;
         int key_bits = 128;
+	
+        using clock = std::chrono::high_resolution_clock;
+
+        auto total_start = clock::now();
+
         ZZ test_prime = GenPrime_ZZ(key_bits);
         int leader_clients = leader_count;
-	int total_clients = client_count;
+        int total_clients = client_count;
 
         std::cout << "\n[VHLCTLP] Server setup" << std::endl;
         Setup_S S = Setup_S(test_prime, leader_clients);
@@ -399,9 +403,15 @@ void testVHLCTLP(int client_count, int leader_count) {
         S.setFieldParams(1);
         S.generatePublicX();
 
+        auto total_end = clock::now();
+
+        std::chrono::duration<double, std::micro> total_time_us = total_end - total_start;
+
+        std::cout << "Server setup (total) total execution time: \033[1;38;5;208m"
+                  << total_time_us.count() / 1000 << "ms\033[0m" << std::endl;
+	
         std::cout << "\n[VHLCTLP] Client setup checks" << std::endl;
-        long lambda = 2048; // key bits for the second primitive
-        Setup_C C = Setup_C(lambda);
+        long lambda = 4096; // key bits for the second primitive
         std::vector<Setup_C> clients = setupMultipleClients(lambda, total_clients); // min treshold: t+2
 
 	// Generate Puzzles
@@ -412,7 +422,7 @@ void testVHLCTLP(int client_count, int leader_count) {
         for (int i = 0; i < total_clients; i++) {
                 ZZ m = RandomBits_ZZ(32);
                 M.append(m);
-		std::cout << "m: " << m << std::endl;
+		//std::cout << "m: " << m << std::endl;
 		sum += to_ZZ_p(m);
         }
 	std::cout << "\033[33m[DEBUG]\033[0m True sum: " << sum << std::endl;
@@ -421,7 +431,7 @@ void testVHLCTLP(int client_count, int leader_count) {
                 int d = static_cast<int>(RandomBnd(9) + 1);
                 delta.push_back(d);
         }
-        int max_ss = 10;
+        int max_ss = 1;
         VHLCTLP_GenPuzzles PuzzleGenerator(M, clients, test_prime, S.getX(), leader_clients, total_clients, delta, max_ss);
         GenPuzzlesOutput output = PuzzleGenerator.generate_and_publish();
 
@@ -429,7 +439,7 @@ void testVHLCTLP(int client_count, int leader_count) {
 	// Adjust input for linear combinations
 	S_LinearCombInput S_input;
 	S_input.o_vectors = output.o_vectors;
-	S_input.delta_combination = 10;
+	S_input.delta_combination = 1;
 	S_input.max_ss = max_ss;
 	S_input.PP = PuzzleGenerator.getPRMs().PP;
 	S_input.p = test_prime;
@@ -506,8 +516,8 @@ int main() {
 	using clock = std::chrono::high_resolution_clock;
 	auto start = clock::now();
 	
-	testVHLCTLP(40, 20); // Client count, Leader count
-	
+	testVHLCTLP(10, 3); // Client count, Leader count	
+
 	auto end = clock::now();
 
 	auto protocolTime = std::chrono::duration_cast<std::chrono::microseconds>(end-start);

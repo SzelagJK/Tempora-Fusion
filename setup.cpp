@@ -44,15 +44,52 @@ const ZZ& Setup_C::getPublicKey() const {return pk;};
 
 // when defining n, generate at least t+2 clients, otherwise the number of clients will be smaller than required (refer to the paper) 
 std::vector<Setup_C> setupMultipleClients(long lambda, int n) {
-	std::vector<Setup_C> clients;
-	clients.reserve(n);
-	for (int i = 0; i < n; i++) {
-		Setup_C c = Setup_C(lambda);
-		clients.push_back(c);
-	}
-	return clients;
-}
+        using clock = std::chrono::high_resolution_clock;
 
+        struct TimingRecord {
+                std::string name;
+                std::chrono::duration<double, std::micro> total_time_us{0};
+        };
+
+        TimingRecord t_total{"setupMultipleClients (total)", {}};
+        TimingRecord t_avg{"Setup_C (average per client)", {}};
+
+        auto total_start = clock::now();
+
+        std::chrono::duration<double, std::micro> cumulative_client_time{0};
+
+        std::vector<Setup_C> clients;
+        clients.reserve(n);
+        for (int i = 0; i < n; i++) {
+
+                auto start = clock::now();
+
+                Setup_C c = Setup_C(lambda);
+                clients.push_back(c);
+
+                auto end = clock::now();
+                cumulative_client_time += end - start;
+        }
+
+        auto total_end = clock::now();
+
+        t_total.total_time_us = total_end - total_start;
+
+        if (n > 0) {
+                t_avg.total_time_us = cumulative_client_time / n;
+        }
+
+        auto print_total = [](const TimingRecord& rec) {
+                std::chrono::duration<double, std::micro> test_time = rec.total_time_us;
+                std::cout << rec.name << " total execution time: \033[1;38;5;208m"
+                          << test_time.count() / 1000 << "ms\033[0m" << std::endl;
+        };
+
+        print_total(t_avg);
+        print_total(t_total);
+
+        return clients;
+}
 
 
 
