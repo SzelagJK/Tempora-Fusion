@@ -192,7 +192,7 @@ void testOT() {
         mpz_init_set_ui(zero, 0);
 
         const int iterations = 1000;
-        const int key_bits = 512;
+        const int key_bits = 128;
         const int choice = 1;
 
         using clock = std::chrono::high_resolution_clock;
@@ -250,18 +250,37 @@ void testOT() {
 }
 
 void testOLE() {
-       	std::cout << "\n\n[TEST] OLE main test\n" << std::endl;
-       	int key_bits = 512; 
-	ZZ test_prime = GenPrime_ZZ(key_bits);
-	Poly_Field PF = Poly_Field(test_prime, 1);
-	OLE OLE_p = OLE(test_prime, key_bits, PF);
-	ZZ testInput = conv<ZZ>(1000);
-	Vec<ZZ> coeffs_ab = init_coeff_vector(3,5);
-	std::cout << "Testing OLE on input: " << testInput << std::endl;
-	ZZ_p result = OLE_p.runOLE(testInput, coeffs_ab);
-	std::cout << "Computed evaluation: " << result << std::endl;
+        using clock = std::chrono::high_resolution_clock;
 
-	std::cout << "	OK\n";
+        std::cout << "\n\n[TEST] OLE main test\n" << std::endl;
+        int key_bits = 128; 
+        ZZ test_prime = GenPrime_ZZ(key_bits);
+        Poly_Field PF = Poly_Field(test_prime, 1);
+        OLE OLE_p = OLE(test_prime, key_bits, PF);
+        ZZ testInput = conv<ZZ>(1000);
+        Vec<ZZ> coeffs_ab = init_coeff_vector(3,5);
+        std::cout << "Testing OLE on input: " << testInput << std::endl;
+
+        ZZ_p result;
+
+        auto total_start = clock::now();
+
+	int iterations = 1000;
+        for (int i = 0; i < iterations; i++) {
+                result = OLE_p.runOLE(testInput, coeffs_ab);
+        }
+
+        auto total_end = clock::now();
+
+        std::chrono::duration<double, std::micro> total_time_us = total_end - total_start;
+        std::chrono::duration<double, std::micro> avg_time_us = total_time_us / iterations;
+
+        std::cout << "Computed evaluation: " << result << std::endl;
+
+        std::cout << "OLE_p.runOLE avg. execution time: \033[1;38;5;208m"
+                  << avg_time_us.count() / 1000 << "ms\033[0m" << std::endl;
+
+        std::cout << "  OK\n";
 }
 
 void testOLE_enhanced() {
@@ -279,7 +298,7 @@ void testOLE_enhanced() {
 	// unit testing
 	using clock = std::chrono::high_resolution_clock;
         ZZ_p result;
-        int iterations = 100;   // change as needed
+        int iterations = 1000;  
         auto start = clock::now();
         for (int i = 0; i < iterations; i++) {
                 OLE_p.runOLE_plus(testInput, coeffs_ab, secrets);
@@ -372,15 +391,33 @@ void testHash() {
 }
 
 void testCoinToss() {
-	std::cout << "\n[TEST] Coin toss protocol";
-	ZZ r_hat = coinToss(20, 128);
-	std::vector<int> indices = determineLeaderIndices(10, 20, r_hat);
-	std::cout << "[Coin Toss] r_hat: " << r_hat << std::endl;
-	std::cout << "[Coin Toss]Leader Clients (indices): ";
-	for (int i = 0; i < indices.size(); i++) {
-		std::cout << indices[i] << " ";
-	}
-	std::cout << "		OK\n";
+        using clock = std::chrono::high_resolution_clock;
+
+        std::cout << "\n[TEST] Coin toss protocoli\n";
+
+        ZZ r_hat;
+
+        auto total_start = clock::now();
+
+        for (int i = 0; i < 1000; i++) {
+                r_hat = coinToss(20, 128);
+        }
+
+        auto total_end = clock::now();
+
+        std::chrono::duration<double, std::micro> total_time_us = total_end - total_start;
+        std::chrono::duration<double, std::micro> avg_time_us = total_time_us / 1000.0;
+
+        std::vector<int> indices = determineLeaderIndices(10, 20, r_hat);
+        std::cout << "[Coin Toss] r_hat: " << r_hat << std::endl;
+        std::cout << "[Coin Toss] Leader Clients (indices): ";
+        for (int i = 0; i < indices.size(); i++) {
+                std::cout << indices[i] << " ";
+        }
+        std::cout << "          OK\n";
+
+        std::cout << "coinToss avg. execution time: \033[1;38;5;208m"
+                  << avg_time_us.count() / 1000 << "ms\033[0m" << std::endl;
 }
 
 void testVHLCTLP(int client_count, int leader_count) {
@@ -411,7 +448,7 @@ void testVHLCTLP(int client_count, int leader_count) {
                   << total_time_us.count() / 1000 << "ms\033[0m" << std::endl;
 	
         std::cout << "\n[VHLCTLP] Client setup checks" << std::endl;
-        long lambda = 4096; // key bits for the second primitive
+        long lambda = 2048; // key bits for the second primitive
         std::vector<Setup_C> clients = setupMultipleClients(lambda, total_clients); // min treshold: t+2
 
 	// Generate Puzzles
@@ -495,23 +532,23 @@ int main() {
     	std::cout << "Running Tests\n\n";
 
     	// Auxillery tests
-    	//testPolynomialGeneration(); // for ZZ_p used in OT	
-    	//testOT();
+    	testPolynomialGeneration(); // for ZZ_p used in OT	
+    	testOT();
 
     	// Main test for OLE
-	// testOLE();
+	testOLE();
 
 	// Main test for OLE+
-	//testOLE_enhanced();
+	testOLE_enhanced();
 
 	// More auxilelry (requires p field)
-	//testPRF();
+	testPRF();
 
-	//testHash();
+	testHash();
 
 	// Tests for VHLC-TLP
 
-	//testCoinToss(); // negligable runtime cost most likley, dont bother with measuring it now 
+	testCoinToss(); // negligable runtime cost most likley, dont bother with measuring it now 
 	
 	using clock = std::chrono::high_resolution_clock;
 	auto start = clock::now();
