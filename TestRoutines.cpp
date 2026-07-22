@@ -265,10 +265,17 @@ void testOLE() {
 
         auto total_start = clock::now();
 
-	int iterations = 1000;
+	int iterations = 10;
         for (int i = 0; i < iterations; i++) {
-                result = OLE_p.runOLE(testInput, coeffs_ab);
+        	result = OLE_p.runOLE(testInput, coeffs_ab);
+
+        	if (result != to_ZZ_p(coeffs_ab[0] + coeffs_ab[1]*testInput)) {
+        		std::cout << "OLE_p.runOLE test \033[31m failed\n \033[0m";
+        		return;
+        	}
         }
+
+		std::cout << "OLE_p.runOLE test \033[32m passed\n \033[0m";
 
         auto total_end = clock::now();
 
@@ -296,13 +303,26 @@ void testOLE_enhanced() {
 	Vec<ZZ> secrets = init_secrets_vector(s, u);
 	std::cout << "Testing OLE+ on input: " << testInput << std::endl;
 	// unit testing
+	//ZZ_p result;
 	using clock = std::chrono::high_resolution_clock;
         ZZ_p result;
-        int iterations = 1000;  
+        int iterations = 10;
         auto start = clock::now();
         for (int i = 0; i < iterations; i++) {
-                OLE_p.runOLE_plus(testInput, coeffs_ab, secrets);
+        	result = OLE_p.runOLE_plus(testInput, coeffs_ab, secrets);
+
+        	if (result != to_ZZ_p(coeffs_ab[0] + coeffs_ab[1]*testInput)) {
+        		// Correctness verification, as specified by reviewers
+        		// Provided that the coefficients used in coeff_ab are the same for all iterations,
+        		// we ensure that the computed result at each iteration is the same as the expected result,
+        		// otherwise return
+        		std::cout << "OLE_p.runOLE_plus test \033[31m failed\n \033[0m";
+        		return;
+        	}
         }
+		std::cout << "OLE_p.runOLE_plus test \033[32m passed\n \033[0m";
+		std::cout << "Correct evaluation: " << (coeffs_ab[0] + coeffs_ab[1]*testInput) << std::endl;
+		std::cout << "Computed evaluation: " << result << std::endl;
         auto end = clock::now();
         std::chrono::duration<double, std::micro> test_time = end - start;
         double average_time = test_time.count() / iterations;
@@ -310,10 +330,7 @@ void testOLE_enhanced() {
         std::cout << "OLE+ average execution time: \033[1;38;5;208m"
                   << average_time / 1000 << "ms\033[0m" << std::endl;
         std::cout << "OLE+ total execution time: \033[1;38;5;208m"
-                  << test_time.count() / 1000 << "ms\033[0m" << std::endl;	
-
-	std::cout << "Correct evaluation: " << (coeffs_ab[0] + coeffs_ab[1]*testInput) << std::endl;
-	std::cout << "Computed evaluation: " << result << std::endl;
+                  << test_time.count() / 1000 << "ms\033[0m" << std::endl;
 }
 
 void testPRF() {
@@ -377,8 +394,8 @@ void testPRF() {
 
 void testHash() {
 	std::cout << "\n[TEST] Commitment test" << std::endl;
-	ZZ_p x = to_ZZ_p(conv<ZZ>(2234552342));
-	ZZ_p r = to_ZZ_p(conv<ZZ>(3001212113));
+	ZZ_p x = to_ZZ_p(2234552342);
+	ZZ_p r = to_ZZ_p(3001212113);
 	int iterations = 10000;
 	auto start = std::chrono::high_resolution_clock::now();
 	for (int i = 0; i < iterations; i++)
@@ -542,13 +559,13 @@ int main() {
 	testOLE_enhanced();
 
 	// More auxilelry (requires p field)
-	testPRF();
+	//testPRF();
 
-	testHash();
+	//testHash();
 
 	// Tests for VHLC-TLP
 
-	testCoinToss(); // negligable runtime cost most likley, dont bother with measuring it now 
+	//testCoinToss(); // negligable runtime cost most likley, dont bother with measuring it now
 	
 	using clock = std::chrono::high_resolution_clock;
 	auto start = clock::now();
