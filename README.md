@@ -32,9 +32,9 @@ g++ gen_puzzle.cpp ope_interface.cpp poly_field.cpp rsa.cpp tlp.cpp commitment.c
 
 ### External Dependencies
 
-- Crypto++ (modern-cryptopp)
-- NTL
-- GMP
+- Crypto++ (cryptopp-modern) https://cryptopp-modern.com/ (guide to installation), https://github.com/cryptopp-modern/cryptopp-modern (github)
+- NTL https://libntl.org/ , https://github.com/libntl/ntl
+- GMP https://gmplib.org/ 
 
 ---
 
