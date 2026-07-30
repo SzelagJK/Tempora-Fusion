@@ -18,24 +18,23 @@ provided executable is a fixed-parameter test and demonstration harness. It
 does not currently expose a command-line interface, consume a dataset, or
 generate paper-ready tables and plots.
 
-## Evaluation road map
-
-The estimates below are deliberately conservative and should be refined with a
-measured reference machine before artifact submission.
+## Road map
 
 | Stage | Reviewer action | Estimated time | Evidence |
 |---|---|---:|---|
 | 1. Inspect | Read this file and check package completeness | 5 human-min | All `.cpp` and corresponding `.h` files are present |
-| 2. Install | Install `cryptopp-modern`, NTL, GMP, and a C++ compiler | 10--20 human-min + 5--20 compute-min | Dependency headers and libraries are discoverable |
+| 2. Install | Install `cryptopp-modern`, NTL, GMP, and a C++ compiler | 10-20 human-min + 5-20 compute-min | Dependency headers and libraries are discoverable |
 | 3. Build | Compile `VHLC_TLP.exe` | 2 human-min + <2 compute-min | Executable is created with exit status 0 |
 | 4. Run | Execute the default functional experiment | 2 human-min + up to 30 compute-min | `run.log` contains the checks listed below |
-| 5. Validate | Compare the computed and reference values and inspect verification lines | 5--10 human-min | The acceptance conditions in [Expected results](#expected-results) hold |
-| 6. Reuse | Change the experiment constants, rebuild, and rerun | 5--15 human-min plus runtime | A new random experiment completes under the chosen configuration |
+| 5. Validate | Compare the computed and reference values and inspect verification lines | 5-10 human-min | The acceptance conditions in [Expected results](#expected-results) hold |
+| 6. Reuse | Change the experiment constants, rebuild, and rerun | 5-15 human-min plus runtime | A new random experiment completes under the chosen configuration |
 
 Runtime depends strongly on CPU performance and cryptographic-library builds.
 The default run generates ten client key pairs whose two RSA factors are each
 2048 bits, and performs many OLE/OT operations. It is therefore normal for the
 terminal to appear busy for several minutes.
+
+**Impoartant:** The compute time (especially for stage 4.) is dependent on the total number of clients and the set number of leader clients. By default we set 3 leader clients and 10 total clients. To change these values modify the parameters of ``testVHLCTLP`` function in ``TestRoutines.cpp`` main function.
 
 ## Package-integrity gate
 
