@@ -91,7 +91,7 @@ systems.
 
 ```bash
 sudo apt update
-sudo apt install build-essential cmake git libntl-dev libgmp-dev
+sudo apt install build-essential ninja-build cmake git libntl-dev libgmp-dev
 ```
 
 Install `cryptopp-modern` from its official repository. The project documents
